@@ -1,0 +1,323 @@
+{% extends 'nomeapp/base.html' %}
+
+<!-- O título que aparece na aba do navegador -->
+{% block title %}{{ livro.titulo }} - Gerenciador de Leitura{% endblock %}
+
+{% block content %}
+<!-- 
+    =============================================
+    DETALHES DO LIVRO
+    Página completa com todas as informações
+    =============================================
+-->
+<div class="row">
+    <!-- 
+        COLUNA DA ESQUERDA - Capa e Ações
+    -->
+    <div class="col-md-4 mb-4">
+        <!-- Imagem da capa -->
+        <div class="card shadow-sm mb-3">
+            {% if livro.capa %}
+                <img src="{{ livro.capa.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}">
+            {% else %}
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <div class="text-center">
+                        <i class="fas fa-book fa-5x mb-3"></i>
+                        <p class="h5">Sem Capa</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                    <!-- Se o usuário está logado, mostra botões de ação -->
+                    
+                    {% if progresso %}
+                        <!-- Já tem esse livro na lista -->
+                        <div class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle"></i> 
+                            Este livro está na sua lista!
+                        </div>
+                        <a href="{% url 'meus_livros' %}" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-bookmark"></i> Ver Meus Livros
+                        </a>
+                    {% else %}
+                        <!-- Ainda não adicionou -->
+                        <a href="{% url 'adicionar_livro_leitura' livro.id %}" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-plus"></i> Adicionar à Minha Lista
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Botão de avaliar -->
+                    <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#modalAvaliacao">
+                        <i class="fas fa-star"></i> 
+                        {% if avaliacao_usuario %}
+                            Editar Minha Avaliação
+                        {% else %}
+                            Avaliar Este Livro
+                        {% endif %}
+                    </button>
+                {% else %}
+                    <!-- Se não está logado, pede pra fazer login -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Faça login para adicionar este livro à sua lista!
+                    </div>
+                    <a href="{% url 'login' %}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-sign-in-alt"></i> Fazer Login
+                    </a>
+                    <a href="{% url 'signup' %}" class="btn btn-outline-success w-100">
+                        <i class="fas fa-user-plus"></i> Criar Conta
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Estatísticas do livro -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Estatísticas
+                </h6>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fas fa-star text-warning"></i> Nota Média:</span>
+                    <strong>{{ livro.nota_media|default:"N/A" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span><i class="fas fa-users"></i> Avaliações:</span>
+                    <strong>{{ livro.total_avaliacoes }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        COLUNA DA DIREITA - Informações e Avaliações
+    -->
+    <div class="col-md-8">
+        <!-- Título e informações principais -->
+        <h1 class="display-5 mb-3">{{ livro.titulo }}</h1>
+        
+        <!-- Avaliação com estrelas grandes -->
+        {% if livro.total_avaliacoes > 0 %}
+            <div class="mb-3">
+                <span class="estrelas h3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= livro.nota_media %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <span class="text-muted">
+                    {{ livro.nota_media }} ({{ livro.total_avaliacoes }} avaliações)
+                </span>
+            </div>
+        {% else %}
+            <p class="text-muted">
+                <i class="far fa-star"></i> Ainda não há avaliações para este livro.
+            </p>
+        {% endif %}
+
+        <!-- Informações do livro em cards -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Informações
+                </h5>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {% if livro.escritor %}
+                            <p>
+                                <i class="fas fa-pen text-primary"></i> 
+                                <strong>Autor:</strong> {{ livro.escritor.nome }}
+                            </p>
+                        {% endif %}
+                        
+                        {% if livro.editora %}
+                            <p>
+                                <i class="fas fa-building text-primary"></i> 
+                                <strong>Editora:</strong> {{ livro.editora.nome }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {% if livro.ano_publicacao %}
+                            <p>
+                                <i class="fas fa-calendar text-primary"></i> 
+                                <strong>Ano:</strong> {{ livro.ano_publicacao }}
+                            </p>
+                        {% endif %}
+                        
+                        {% if livro.numero_paginas %}
+                            <p>
+                                <i class="fas fa-file-alt text-primary"></i> 
+                                <strong>Páginas:</strong> {{ livro.numero_paginas }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meu progresso (se existir) -->
+        {% if progresso %}
+            <div class="card shadow-sm mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Meu Progresso
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                <span class="badge 
+                                    {% if progresso.status == 'CONCLUIDO' %}bg-success
+                                    {% elif progresso.status == 'LENDO' %}bg-primary
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ progresso.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Página Atual:</strong> {{ progresso.pagina_atual }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Pontos:</strong> {{ progresso.pontos }} pts</p>
+                            <p><strong>Progresso:</strong> {{ progresso.porcentagem }}%</p>
+                        </div>
+                    </div>
+                    <!-- Barra de progresso visual -->
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progresso.porcentagem }}%;" 
+                             aria-valuenow="{{ progresso.porcentagem }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ progresso.porcentagem }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- 
+            =============================================
+            AVALIAÇÕES DOS USUÁRIOS
+            Lista todas as avaliações que o livro recebeu
+            =============================================
+        -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-comments"></i> Avaliações 
+                    <span class="badge bg-secondary">{{ avaliacoes.count }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if avaliacoes %}
+                    {% for avaliacao in avaliacoes %}
+                        <div class="{% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                            <!-- Nome do usuário e nota -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>
+                                        <i class="fas fa-user-circle"></i> {{ avaliacao.usuario.username }}
+                                    </strong>
+                                    <!-- Se for a avaliação do próprio usuário, marca -->
+                                    {% if avaliacao.usuario == user %}
+                                        <span class="badge bg-info">Você</span>
+                                    {% endif %}
+                                </div>
+                                <div class="estrelas">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avaliacao.nota %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Comentário -->
+                            {% if avaliacao.comentario %}
+                                <p class="mb-1">{{ avaliacao.comentario }}</p>
+                            {% endif %}
+                            
+                            <!-- Data -->
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> {{ avaliacao.criado|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-inbox"></i> 
+                        Nenhuma avaliação ainda. Seja o primeiro a avaliar!
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    MODAL DE AVALIAÇÃO
+    Janela popup onde o usuário avalia o livro
+    =============================================
+-->
+<div class="modal fade" id="modalAvaliacao" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-star"></i> Avaliar "{{ livro.titulo }}"
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'adicionar_avaliacao' livro.id %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    
+                    <!-- Seletor de nota (estrelas) -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Sua nota:</strong></label>
+                        <div class="btn-group w-100" role="group">
+                            {% for i in "12345" %}
+                                <input type="radio" class="btn-check" name="nota" id="nota{{ i }}" value="{{ i }}" 
+                                       {% if avaliacao_usuario.nota == i|add:"0" %}checked{% endif %} required>
+                                <label class="btn btn-outline-warning" for="nota{{ i }}">
+                                    {{ i }} <i class="fas fa-star"></i>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Campo de comentário -->
+                    <div class="mb-3">
+                        <label for="comentario" class="form-label"><strong>Seu comentário (opcional):</strong></label>
+                        <textarea 
+                            class="form-control" 
+                            id="comentario" 
+                            name="comentario" 
+                            rows="4" 
+                            placeholder="O que você achou do livro? Conte pra gente!">{% if avaliacao_usuario %}{{ avaliacao_usuario.comentario }}{% endif %}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-star"></i> Salvar Avaliação
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

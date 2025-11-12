@@ -1,0 +1,319 @@
+{% extends 'nomeapp/base.html' %}
+
+<!-- O título que aparece na aba do navegador -->
+{% block title %}Meus Livros - Gerenciador de Leitura{% endblock %}
+
+{% block content %}
+<!-- 
+    =============================================
+    MEUS LIVROS
+    Lista pessoal de livros do usuário com progresso
+    =============================================
+-->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>
+            <i class="fas fa-bookmark"></i> Minha Biblioteca
+        </h1>
+        <p class="text-muted">Acompanhe seu progresso e gerencie suas leituras</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{% url 'lista_livros' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Adicionar Mais Livros
+        </a>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    FILTROS POR STATUS
+    Botões para filtrar: Lendo, Concluído, Pausado
+    =============================================
+-->
+<div class="btn-group mb-4" role="group">
+    <a href="{% url 'meus_livros' %}" class="btn {% if not request.GET.status %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        <i class="fas fa-list"></i> Todos
+    </a>
+    <a href="?status=LENDO" class="btn {% if request.GET.status == 'LENDO' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        <i class="fas fa-book-open"></i> Lendo
+    </a>
+    <a href="?status=CONCLUIDO" class="btn {% if request.GET.status == 'CONCLUIDO' %}btn-success{% else %}btn-outline-success{% endif %}">
+        <i class="fas fa-check-circle"></i> Concluídos
+    </a>
+    <a href="?status=PAUSADO" class="btn {% if request.GET.status == 'PAUSADO' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+        <i class="fas fa-pause-circle"></i> Pausados
+    </a>
+</div>
+
+<!-- 
+    =============================================
+    LISTA DE LIVROS DO USUÁRIO
+    Mostra todos os livros com barra de progresso
+    =============================================
+-->
+{% if progressos %}
+    <div class="row">
+        {% for progresso in progressos %}
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="row g-0">
+                        <!-- Miniatura da capa (lado esquerdo) -->
+                        <div class="col-4">
+                            {% if progresso.livro.capa %}
+                                <img src="{{ progresso.livro.capa.url }}" class="img-fluid rounded-start h-100" 
+                                     alt="{{ progresso.livro.titulo }}" style="object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center h-100">
+                                    <i class="fas fa-book fa-3x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Informações do livro (lado direito) -->
+                        <div class="col-8">
+                            <div class="card-body">
+                                <!-- Título -->
+                                <h5 class="card-title">{{ progresso.livro.titulo }}</h5>
+                                
+                                <!-- Autor -->
+                                {% if progresso.livro.escritor %}
+                                    <p class="small text-muted mb-2">
+                                        <i class="fas fa-pen"></i> {{ progresso.livro.escritor.nome }}
+                                    </p>
+                                {% endif %}
+
+                                <!-- Badge de status -->
+                                <div class="mb-2">
+                                    <span class="badge 
+                                        {% if progresso.status == 'CONCLUIDO' %}bg-success
+                                        {% elif progresso.status == 'LENDO' %}bg-primary
+                                        {% else %}bg-warning{% endif %}">
+                                        {{ progresso.get_status_display }}
+                                    </span>
+                                </div>
+
+                                <!-- Barra de progresso -->
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar 
+                                        {% if progresso.status == 'CONCLUIDO' %}bg-success
+                                        {% elif progresso.status == 'LENDO' %}bg-primary
+                                        {% else %}bg-warning{% endif %}"
+                                         role="progressbar" 
+                                         style="width: {{ progresso.porcentagem }}%"
+                                         aria-valuenow="{{ progresso.porcentagem }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ progresso.porcentagem }}%
+                                    </div>
+                                </div>
+
+                                <!-- Informações de progresso -->
+                                <div class="small text-muted mb-2">
+                                    <i class="fas fa-bookmark"></i> Página {{ progresso.pagina_atual }}
+                                    {% if progresso.livro.numero_paginas %}
+                                        de {{ progresso.livro.numero_paginas }}
+                                    {% endif %}
+                                    <br>
+                                    <i class="fas fa-trophy"></i> {{ progresso.pontos }} pontos
+                                </div>
+
+                                <!-- Botões de ação -->
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalAtualizar{{ progresso.id }}">
+                                        <i class="fas fa-edit"></i> Atualizar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalSessao{{ progresso.id }}">
+                                        <i class="fas fa-clock"></i> Sessão
+                                    </button>
+                                    <a href="{% url 'detalhe_livro' progresso.livro.id %}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i> Detalhes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 
+                    MODAL PARA ATUALIZAR PROGRESSO
+                    Popup onde o usuário atualiza páginas e status
+                -->
+                <div class="modal fade" id="modalAtualizar{{ progresso.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-edit"></i> Atualizar "{{ progresso.livro.titulo }}"
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="{% url 'atualizar_progresso' progresso.id %}">
+                                <div class="modal-body">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Campo de página atual -->
+                                    <div class="mb-3">
+                                        <label for="pagina{{ progresso.id }}" class="form-label">
+                                            <strong>Página Atual:</strong>
+                                        </label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="pagina{{ progresso.id }}"
+                                               name="pagina_atual" 
+                                               value="{{ progresso.pagina_atual }}"
+                                               min="0"
+                                               {% if progresso.livro.numero_paginas %}max="{{ progresso.livro.numero_paginas }}"{% endif %}>
+                                        {% if progresso.livro.numero_paginas %}
+                                            <small class="text-muted">Total: {{ progresso.livro.numero_paginas }} páginas</small>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo de status -->
+                                    <div class="mb-3">
+                                        <label for="status{{ progresso.id }}" class="form-label">
+                                            <strong>Status:</strong>
+                                        </label>
+                                        <select class="form-select" id="status{{ progresso.id }}" name="status">
+                                            <option value="LENDO" {% if progresso.status == 'LENDO' %}selected{% endif %}>
+                                                Lendo
+                                            </option>
+                                            <option value="CONCLUIDO" {% if progresso.status == 'CONCLUIDO' %}selected{% endif %}>
+                                                Concluído
+                                            </option>
+                                            <option value="PAUSADO" {% if progresso.status == 'PAUSADO' %}selected{% endif %}>
+                                                Pausado
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Salvar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 
+                    MODAL PARA REGISTRAR SESSÃO DE LEITURA
+                    Popup onde o usuário informa quantas páginas leu hoje
+                -->
+                <div class="modal fade" id="modalSessao{{ progresso.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-clock"></i> Registrar Sessão - "{{ progresso.livro.titulo }}"
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="{% url 'registrar_sessao' progresso.id %}">
+                                <div class="modal-body">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Info atual -->
+                                    <div class="alert alert-info">
+                                        <strong>Página atual:</strong> {{ progresso.pagina_atual }}
+                                        {% if progresso.livro.numero_paginas %}
+                                            de {{ progresso.livro.numero_paginas }}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Campo de páginas lidas -->
+                                    <div class="mb-3">
+                                        <label for="paginas{{ progresso.id }}" class="form-label">
+                                            <strong>Quantas páginas você leu nesta sessão?</strong>
+                                        </label>
+                                        <input type="number" 
+                                               class="form-control form-control-lg" 
+                                               id="paginas{{ progresso.id }}"
+                                               name="paginas_lidas" 
+                                               min="1"
+                                               placeholder="Ex: 20"
+                                               required
+                                               autofocus>
+                                        <small class="text-muted">
+                                            As páginas serão somadas ao seu progresso atual
+                                        </small>
+                                    </div>
+
+                                    <!-- Informações sobre pontos -->
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-trophy"></i> <strong>Você vai ganhar:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>Pontos pelas páginas lidas</li>
+                                            <li>Pontos pela sessão de leitura (5 pts base)</li>
+                                            <li>Bônus se ler dias seguidos (até +15 pts!)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Registrar Sessão
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Quando não tem livros na biblioteca -->
+    <div class="text-center py-5">
+        <i class="fas fa-book-open fa-5x text-muted mb-3"></i>
+        <h3>Sua biblioteca está vazia</h3>
+        <p class="text-muted mb-4">
+            Comece adicionando livros à sua lista de leitura!
+        </p>
+        <a href="{% url 'lista_livros' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-search"></i> Explorar Livros
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+<!-- 
+    =============================================
+    JAVASCRIPT PARA VERIFICAR SE CONCLUIU O LIVRO
+    Quando atualizar as páginas, verifica se chegou no final
+    =============================================
+-->
+{% block extra_js %}
+<script>
+// Verifica se o usuário atingiu o total de páginas ao atualizar
+document.querySelectorAll('form[action*="atualizar"]').forEach(form => {
+    const inputPagina = form.querySelector('input[name="pagina_atual"]');
+    const selectStatus = form.querySelector('select[name="status"]');
+    
+    if (inputPagina && selectStatus) {
+        inputPagina.addEventListener('change', function() {
+            const paginaAtual = parseInt(this.value);
+            const totalPaginas = parseInt(this.max);
+            
+            // Se chegou no total de páginas (ou passou)
+            if (totalPaginas && paginaAtual >= totalPaginas) {
+                // Pergunta se quer marcar como concluído
+                if (confirm('Você chegou no final do livro! Deseja marcar como concluído?')) {
+                    selectStatus.value = 'CONCLUIDO';
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

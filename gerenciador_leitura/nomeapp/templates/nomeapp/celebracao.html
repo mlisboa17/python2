@@ -1,0 +1,278 @@
+{% extends 'nomeapp/base.html' %}
+
+{% block title %}Parabéns! 🎉 - Gerenciador de Leitura{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 
+        Estilos para a página de celebração 
+        Deixa tudo bonito e festivo! 🎊
+    */
+    .celebracao-container {
+        text-align: center;
+        padding: 50px 20px;
+        position: relative;
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .titulo-celebracao {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #ffc107;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .card-celebracao {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        animation: slideIn 1s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .stat-box {
+        background: rgba(255,255,255,0.2);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 10px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .ranking-badge {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #ffd700;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="celebracao-container">
+    <!-- 
+        ==========================================
+        TÍTULO DE PARABÉNS
+        ==========================================
+    -->
+    <h1 class="titulo-celebracao">
+        🎉 PARABÉNS! 🎊
+    </h1>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- 
+                    ==========================================
+                    CARD PRINCIPAL DE CELEBRAÇÃO
+                    ==========================================
+                -->
+                <div class="card card-celebracao mb-4">
+                    <div class="card-body p-5">
+                        <h2 class="mb-4">
+                            Você concluiu o livro!
+                        </h2>
+                        
+                        <div class="mb-4">
+                            <i class="fas fa-book fa-4x mb-3"></i>
+                            <h3>"{{ livro.titulo }}"</h3>
+                            {% if livro.escritor %}
+                                <p class="lead">por {{ livro.escritor.nome }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <hr class="bg-white">
+                        
+                        <!-- 
+                            ==========================================
+                            ESTATÍSTICAS DA CONQUISTA
+                            ==========================================
+                        -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <i class="fas fa-trophy fa-2x mb-2"></i>
+                                    <h4>{{ total_pontos }}</h4>
+                                    <p class="mb-0">Pontos Totais</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h4>{{ livros_concluidos }}</h4>
+                                    <p class="mb-0">Livros Concluídos</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <i class="fas fa-fire fa-2x mb-2"></i>
+                                    <h4>{{ progresso.sequencia_atual }}</h4>
+                                    <p class="mb-0">Dias Seguidos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 
+                    ==========================================
+                    POSIÇÃO NO RANKING
+                    ==========================================
+                -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body text-center p-5">
+                        <h3 class="mb-4">
+                            <i class="fas fa-medal text-warning"></i> 
+                            Sua Posição no Ranking
+                        </h3>
+                        
+                        {% if posicao_ranking %}
+                            <div class="ranking-badge mb-3">
+                                #{{ posicao_ranking }}
+                            </div>
+                            <p class="lead">
+                                de {{ total_usuarios }} leitores
+                            </p>
+                            
+                            <!-- Mensagens motivacionais baseadas na posição -->
+                            {% if posicao_ranking == 1 %}
+                                <div class="alert alert-warning mt-4">
+                                    <h4>🏆 VOCÊ É O NÚMERO 1! 🏆</h4>
+                                    <p class="mb-0">
+                                        Incrível! Você é o melhor leitor do sistema! Continue assim! 👑
+                                    </p>
+                                </div>
+                            {% elif posicao_ranking <= 3 %}
+                                <div class="alert alert-success mt-4">
+                                    <h4>🥇 TOP 3! 🥇</h4>
+                                    <p class="mb-0">
+                                        Você está entre os melhores! Continue lendo para chegar ao topo! 🚀
+                                    </p>
+                                </div>
+                            {% elif posicao_ranking <= 10 %}
+                                <div class="alert alert-info mt-4">
+                                    <h4>⭐ TOP 10! ⭐</h4>
+                                    <p class="mb-0">
+                                        Excelente! Você está entre os 10 melhores leitores! 📚
+                                    </p>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-primary mt-4">
+                                    <h4>💪 Continue Assim! 💪</h4>
+                                    <p class="mb-0">
+                                        Toda leitura conta! Continue se dedicando e você subirá no ranking! 🌟
+                                    </p>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Calculando sua posição...</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 
+                    ==========================================
+                    BOTÕES DE AÇÃO
+                    ==========================================
+                -->
+                <div class="text-center">
+                    <a href="{% url 'adicionar_avaliacao' livro.id %}" class="btn btn-warning btn-lg me-2 mb-2">
+                        <i class="fas fa-star"></i> Avaliar Este Livro
+                    </a>
+                    <a href="{% url 'lista_livros' %}" class="btn btn-primary btn-lg me-2 mb-2">
+                        <i class="fas fa-book"></i> Próxima Leitura
+                    </a>
+                    <a href="{% url 'ranking_pontos' %}" class="btn btn-outline-secondary btn-lg mb-2">
+                        <i class="fas fa-trophy"></i> Ver Ranking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Canvas para os confetes (fica invisível, apenas mostra animação) -->
+<canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 
+    ==========================================
+    JAVASCRIPT PARA ANIMAÇÃO DE CONFETES
+    Biblioteca canvas-confetti - super leve e bonita!
+    ==========================================
+-->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+// Quando a página carregar, solta os confetes! 🎊
+document.addEventListener('DOMContentLoaded', function() {
+    // Configura o canvas dos confetes
+    var myConfetti = confetti.create(document.getElementById('confetti-canvas'), {
+        resize: true,
+        useWorker: true
+    });
+    
+    // Função para jogar confetes
+    function jogarConfetes() {
+        myConfetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+    
+    // Joga confetes logo que a página carrega
+    jogarConfetes();
+    
+    // Joga mais confetes depois de 0.3 segundos
+    setTimeout(jogarConfetes, 300);
+    
+    // E mais uma vez depois de 0.6 segundos (efeito triplo!)
+    setTimeout(jogarConfetes, 600);
+    
+    // Confetes contínuos por 3 segundos
+    var duration = 3 * 1000;
+    var end = Date.now() + duration;
+    
+    (function frame() {
+        myConfetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+        });
+        myConfetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+            requestAnimationFrame(frame);
+        }
+    }());
+});
+</script>
+{% endblock %}

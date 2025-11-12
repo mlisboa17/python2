@@ -1,0 +1,183 @@
+{% extends 'nomeapp/base.html' %}
+
+<!-- O título que aparece na aba do navegador -->
+{% block title %}Livros - Gerenciador de Leitura{% endblock %}
+
+{% block content %}
+<!-- 
+    =============================================
+    TÍTULO E BUSCA
+    =============================================
+-->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>
+            <i class="fas fa-book"></i> Catálogo de Livros
+        </h1>
+        <p class="text-muted">Explore nossa coleção e encontre sua próxima leitura!</p>
+    </div>
+    <div class="col-md-4">
+        <!-- Formulário de busca -->
+        <form method="get" action="{% url 'lista_livros' %}">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="q" 
+                    class="form-control" 
+                    placeholder="Buscar livros, autores..."
+                    value="{{ query }}"
+                >
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    FILTROS E ORDENAÇÃO
+    Permite ordenar os livros de diferentes formas
+    =============================================
+-->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0">
+                    <strong>{{ livros.count }}</strong> livro{{ livros.count|pluralize }} encontrado{{ livros.count|pluralize }}
+                </p>
+            </div>
+            <div class="col-md-6">
+                <!-- Ordenação -->
+                <div class="d-flex justify-content-md-end">
+                    <label class="me-2 align-self-center mb-0">Ordenar por:</label>
+                    <select class="form-select form-select-sm" style="width: auto;" onchange="location = this.value;">
+                        <option value="?ordem=-nota_media" {% if request.GET.ordem == '-nota_media' or not request.GET.ordem %}selected{% endif %}>
+                            Melhor Avaliação
+                        </option>
+                        <option value="?ordem=titulo" {% if request.GET.ordem == 'titulo' %}selected{% endif %}>
+                            Título (A-Z)
+                        </option>
+                        <option value="?ordem=-titulo" {% if request.GET.ordem == '-titulo' %}selected{% endif %}>
+                            Título (Z-A)
+                        </option>
+                        <option value="?ordem=-ano_publicacao" {% if request.GET.ordem == '-ano_publicacao' %}selected{% endif %}>
+                            Mais Recentes
+                        </option>
+                        <option value="?ordem=ano_publicacao" {% if request.GET.ordem == 'ano_publicacao' %}selected{% endif %}>
+                            Mais Antigos
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    LISTA DE LIVROS
+    Grid responsivo com cards dos livros
+    =============================================
+-->
+{% if livros %}
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for livro in livros %}
+            <div class="col">
+                <!-- Card do livro -->
+                <div class="card card-livro h-100 shadow-sm">
+                    <!-- Imagem da capa -->
+                    {% if livro.capa %}
+                        <img src="{{ livro.capa.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}" style="height: 300px; object-fit: cover;">
+                    {% else %}
+                        <!-- Placeholder quando não tem capa -->
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <div class="text-center">
+                                <i class="fas fa-book fa-4x mb-2"></i>
+                                <p class="mb-0">Sem Capa</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body d-flex flex-column">
+                        <!-- Título do livro -->
+                        <h5 class="card-title">{{ livro.titulo }}</h5>
+                        
+                        <!-- Informações do livro -->
+                        <div class="mb-2">
+                            {% if livro.escritor %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-pen"></i> <strong>Autor:</strong> {{ livro.escritor.nome }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if livro.editora %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-building"></i> <strong>Editora:</strong> {{ livro.editora.nome }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if livro.ano_publicacao %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-calendar"></i> <strong>Ano:</strong> {{ livro.ano_publicacao }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if livro.numero_paginas %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-file-alt"></i> <strong>Páginas:</strong> {{ livro.numero_paginas }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Avaliação com estrelas -->
+                        <div class="mb-3">
+                            {% if livro.total_avaliacoes > 0 %}
+                                <div class="estrelas">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= livro.nota_media %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted">
+                                    {{ livro.nota_media }} ({{ livro.total_avaliacoes }} avaliações)
+                                </small>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="far fa-star"></i> Sem avaliações
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botão no final do card (sempre fica embaixo) -->
+                        <div class="mt-auto">
+                            <a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-primary w-100">
+                                <i class="fas fa-eye"></i> Ver Detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Quando não encontra nenhum livro -->
+    <div class="alert alert-warning text-center">
+        <i class="fas fa-search"></i>
+        <h4>Nenhum livro encontrado</h4>
+        {% if query %}
+            <p>Não encontramos livros com o termo "{{ query }}".</p>
+            <a href="{% url 'lista_livros' %}" class="btn btn-outline-primary">
+                <i class="fas fa-redo"></i> Ver Todos os Livros
+            </a>
+        {% else %}
+            <p>Ainda não há livros cadastrados no sistema.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

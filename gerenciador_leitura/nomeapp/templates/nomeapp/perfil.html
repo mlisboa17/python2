@@ -1,0 +1,259 @@
+{% extends 'nomeapp/base.html' %}
+
+<!-- O título que aparece na aba do navegador -->
+{% block title %}Meu Perfil - Gerenciador de Leitura{% endblock %}
+
+{% block content %}
+<!-- 
+    =============================================
+    PERFIL DO USUÁRIO
+    Página com todas as estatísticas pessoais
+    =============================================
+-->
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-user-circle"></i> Meu Perfil
+        </h1>
+        <p class="text-muted">Veja todas as suas conquistas e estatísticas de leitura</p>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    INFORMAÇÕES DO USUÁRIO
+    =============================================
+-->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <i class="fas fa-user-circle fa-5x text-primary"></i>
+            </div>
+            <div class="col-md-10">
+                <h3>{{ user.username }}</h3>
+                {% if user.nome_completo %}
+                    <p class="text-muted mb-1">
+                        <i class="fas fa-id-card"></i> {{ user.nome_completo }}
+                    </p>
+                {% endif %}
+                <p class="text-muted mb-0">
+                    <i class="fas fa-envelope"></i> {{ user.email }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    ESTATÍSTICAS GERAIS
+    Cards com números grandes e bonitos
+    =============================================
+-->
+<h3 class="mb-3">
+    <i class="fas fa-chart-bar"></i> Minhas Estatísticas
+</h3>
+
+<div class="row mb-4">
+    <!-- Total de livros -->
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                <h2 class="display-4 mb-0">{{ estatisticas.total_livros }}</h2>
+                <p class="text-muted mb-0">Livros na Biblioteca</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livros concluídos -->
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h2 class="display-4 mb-0">{{ estatisticas.livros_concluidos }}</h2>
+                <p class="text-muted mb-0">Livros Concluídos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livros lendo -->
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-book-open fa-3x text-info mb-3"></i>
+                <h2 class="display-4 mb-0">{{ estatisticas.livros_lendo }}</h2>
+                <p class="text-muted mb-0">Lendo Agora</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total de pontos -->
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100 text-center border-warning">
+            <div class="card-body">
+                <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
+                <h2 class="display-4 mb-0">{{ estatisticas.total_pontos }}</h2>
+                <p class="text-muted mb-0">Pontos Totais</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    ESTATÍSTICAS DE SESSÕES E AVALIAÇÕES
+    =============================================
+-->
+<div class="row mb-4">
+    <!-- Sessões de leitura -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                <h4>{{ estatisticas.total_sessoes }}</h4>
+                <p class="text-muted mb-0">Sessões de Leitura</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maior sequência -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-fire fa-2x text-danger mb-2"></i>
+                <h4>{{ estatisticas.maior_sequencia }}</h4>
+                <p class="text-muted mb-0">Maior Sequência de Dias</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avaliações -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                <h4>{{ estatisticas.total_avaliacoes }}</h4>
+                <p class="text-muted mb-0">Livros Avaliados</p>
+                {% if estatisticas.media_notas > 0 %}
+                    <small class="text-muted">
+                        (média: {{ estatisticas.media_notas|floatformat:1 }} ★)
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    PROGRESSOS RECENTES
+    Últimos 5 livros que você atualizou
+    =============================================
+-->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-history"></i> Progressos Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if progressos_recentes %}
+                    <div class="list-group list-group-flush">
+                        {% for progresso in progressos_recentes %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong>{{ progresso.livro.titulo }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ progresso.porcentagem }}% completo
+                                            <span class="badge 
+                                                {% if progresso.status == 'CONCLUIDO' %}bg-success
+                                                {% elif progresso.status == 'LENDO' %}bg-primary
+                                                {% else %}bg-warning{% endif %} ms-2">
+                                                {{ progresso.get_status_display }}
+                                            </span>
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-trophy text-warning"></i> {{ progresso.pontos }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center mb-0">
+                        Nenhum progresso registrado ainda.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        =============================================
+        AVALIAÇÕES RECENTES
+        Últimas 5 avaliações que você fez
+        =============================================
+    -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">
+                    <i class="fas fa-star"></i> Minhas Avaliações Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if avaliacoes_recentes %}
+                    <div class="list-group list-group-flush">
+                        {% for avaliacao in avaliacoes_recentes %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong>{{ avaliacao.livro.titulo }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ avaliacao.criado|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                    <div class="estrelas">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= avaliacao.nota %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% if avaliacao.comentario %}
+                                    <p class="small mb-0 mt-2">{{ avaliacao.comentario|truncatewords:20 }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center mb-0">
+                        Você ainda não avaliou nenhum livro.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botões de ação -->
+<div class="text-center mt-4">
+    <a href="{% url 'meus_livros' %}" class="btn btn-primary btn-lg me-2">
+        <i class="fas fa-bookmark"></i> Ver Meus Livros
+    </a>
+    <a href="{% url 'ranking_pontos' %}" class="btn btn-outline-warning btn-lg">
+        <i class="fas fa-trophy"></i> Ver Ranking
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'nomeapp/base.html' %}
+
+<!-- O título que aparece na aba do navegador -->
+{% block title %}Início - Gerenciador de Leitura{% endblock %}
+
+{% block content %}
+<!-- 
+    =============================================
+    SEÇÃO DE BOAS-VINDAS (HERO)
+    É aquele banner grandão que aparece no topo
+    =============================================
+-->
+<div class="jumbotron bg-light p-5 rounded-3 mb-4">
+    <div class="container-fluid py-5">
+        <h1 class="display-4">
+            <i class="fas fa-book-reader"></i> Bem-vindo ao Gerenciador de Leitura!
+        </h1>
+        <p class="lead">
+            Acompanhe suas leituras, ganhe pontos e compartilhe suas experiências com livros! 📚
+        </p>
+        <hr class="my-4">
+        <p>
+            Registre seu progresso, avalie livros e compete com outros leitores no ranking.
+            {% if not user.is_authenticated %}
+                Crie sua conta gratuitamente e comece agora!
+            {% endif %}
+        </p>
+        
+        <!-- Botões de ação -->
+        {% if user.is_authenticated %}
+            <!-- Se o usuário está logado, mostra botão pra ir pros livros dele -->
+            <a class="btn btn-primary btn-lg" href="{% url 'meus_livros' %}" role="button">
+                <i class="fas fa-bookmark"></i> Ver Meus Livros
+            </a>
+            <a class="btn btn-outline-secondary btn-lg" href="{% url 'lista_livros' %}" role="button">
+                <i class="fas fa-search"></i> Explorar Livros
+            </a>
+        {% else %}
+            <!-- Se não está logado, convida pra se cadastrar -->
+            <a class="btn btn-success btn-lg" href="{% url 'signup' %}" role="button">
+                <i class="fas fa-user-plus"></i> Cadastre-se Grátis
+            </a>
+            <a class="btn btn-outline-primary btn-lg" href="{% url 'login' %}" role="button">
+                <i class="fas fa-sign-in-alt"></i> Já Tenho Conta
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    LIVROS EM DESTAQUE
+    Mostra os 6 livros com melhor avaliação
+    =============================================
+-->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>
+            <i class="fas fa-star text-warning"></i> Livros em Destaque
+        </h2>
+        <a href="{% url 'lista_livros' %}" class="btn btn-outline-primary">
+            Ver Todos <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    {% if livros_destaque %}
+        <!-- Grade com os livros (2 colunas no celular, 3 no tablet, 6 no desktop) -->
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+            {% for livro in livros_destaque %}
+                <div class="col">
+                    <!-- Card do livro -->
+                    <div class="card card-livro h-100 shadow-sm">
+                        <!-- Imagem da capa do livro -->
+                        {% if livro.capa %}
+                            <img src="{{ livro.capa.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <!-- Se não tem capa, mostra um placeholder -->
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            <!-- Título do livro -->
+                            <h6 class="card-title mb-2" style="height: 3em; overflow: hidden;">
+                                {{ livro.titulo }}
+                            </h6>
+                            
+                            <!-- Autor -->
+                            {% if livro.escritor %}
+                                <p class="card-text small text-muted mb-2">
+                                    <i class="fas fa-pen"></i> {{ livro.escritor.nome }}
+                                </p>
+                            {% endif %}
+
+                            <!-- Nota média com estrelas -->
+                            <div class="mb-2">
+                                {% if livro.total_avaliacoes > 0 %}
+                                    <span class="estrelas">
+                                        <!-- Repete estrelas de acordo com a nota -->
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= livro.nota_media %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <small class="text-muted">
+                                        ({{ livro.total_avaliacoes }})
+                                    </small>
+                                {% else %}
+                                    <small class="text-muted">
+                                        Sem avaliações ainda
+                                    </small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Botão para ver detalhes -->
+                            <a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-sm btn-outline-primary w-100">
+                                <i class="fas fa-info-circle"></i> Ver Detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Se não tem livros cadastrados ainda -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            Nenhum livro cadastrado ainda. Em breve teremos livros incríveis aqui!
+        </div>
+    {% endif %}
+</div>
+
+<!-- 
+    =============================================
+    SEÇÃO DE RECURSOS
+    Mostra o que o site oferece
+    =============================================
+-->
+<div class="row mb-5">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 text-center shadow-sm">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-chart-line fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Acompanhe seu Progresso</h5>
+                <p class="card-text">
+                    Registre quantas páginas você já leu e veja sua evolução em tempo real!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 text-center shadow-sm">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-trophy fa-3x text-warning"></i>
+                </div>
+                <h5 class="card-title">Sistema de Pontos</h5>
+                <p class="card-text">
+                    Ganhe pontos lendo todos os dias e suba no ranking dos melhores leitores!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 text-center shadow-sm">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-star fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Avalie Livros</h5>
+                <p class="card-text">
+                    Deixe sua opinião sobre os livros e ajude outros leitores a escolher!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
