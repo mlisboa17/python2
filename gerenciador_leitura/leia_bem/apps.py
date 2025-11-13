@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class NomeappConfig(AppConfig):
+class LeiaBemConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'nomeapp'
+    name = 'leia_bem'

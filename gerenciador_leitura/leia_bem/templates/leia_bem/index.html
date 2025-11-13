@@ -1,4 +1,4 @@
-{% extends 'nomeapp/base.html' %}
+{% extends 'leia_bem/base.html' %}
 
 <!-- O título que aparece na aba do navegador -->
 {% block title %}Início - Gerenciador de Leitura{% endblock %}
@@ -10,7 +10,7 @@
     É aquele banner grandão que aparece no topo
     =============================================
 -->
-<div class="jumbotron bg-light p-5 rounded-3 mb-4">
+<div class="jumbotron bg-light p-5 rounded-3 mb-4" data-aos="fade-up">
     <div class="container-fluid py-5">
         <h1 class="display-4">
             <i class="fas fa-book-reader"></i> Bem-vindo ao Gerenciador de Leitura!
@@ -54,7 +54,7 @@
     =============================================
 -->
 <div class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3" data-aos="fade-up">
         <h2>
             <i class="fas fa-star text-warning"></i> Livros em Destaque
         </h2>
@@ -67,7 +67,7 @@
         <!-- Grade com os livros (2 colunas no celular, 3 no tablet, 6 no desktop) -->
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
             {% for livro in livros_destaque %}
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="{% cycle '0' '50' '100' '150' '200' '250' %}">
                     <!-- Card do livro -->
                     <div class="card card-livro h-100 shadow-sm">
                         <!-- Imagem da capa do livro -->
@@ -141,7 +141,7 @@
     =============================================
 -->
 <div class="row mb-5">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="0">
         <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
                 <div class="mb-3">
@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    <div class="col-md-4 mb-3">
+    <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
         <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
                 <div class="mb-3">
@@ -169,7 +169,7 @@
         </div>
     </div>
 
-    <div class="col-md-4 mb-3">
+    <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
         <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
                 <div class="mb-3">

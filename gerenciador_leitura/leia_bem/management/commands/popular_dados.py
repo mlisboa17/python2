@@ -12,7 +12,7 @@ Como usar:
 """
 
 from django.core.management.base import BaseCommand
-from nomeapp.models import Editora, Escritor, Livro
+from leia_bem.models import Editora, Escritor, Livro
 
 
 class Command(BaseCommand):

@@ -1,4 +1,4 @@
-{% extends 'nomeapp/base.html' %}
+{% extends 'leia_bem/base.html' %}
 
 <!-- O título que aparece na aba do navegador -->
 {% block title %}Meu Perfil - Gerenciador de Leitura{% endblock %}
@@ -98,6 +98,23 @@
                 <p class="text-muted mb-0">Pontos Totais</p>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- 
+    =============================================
+    GRÁFICO DE PROGRESSO
+    Visualização bonita das suas estatísticas
+    =============================================
+-->
+<div class="card shadow-sm mb-4" data-aos="fade-up">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-chart-pie"></i> Visão Geral da Leitura
+        </h5>
+    </div>
+    <div class="card-body">
+        <canvas id="graficoProgresso" style="max-height: 300px;"></canvas>
     </div>
 </div>
 
@@ -256,4 +273,67 @@
         <i class="fas fa-trophy"></i> Ver Ranking
     </a>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js - Biblioteca para gráficos bonitos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Cria o gráfico de pizza com as estatísticas
+    const ctx = document.getElementById('graficoProgresso').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut', // Gráfico de rosca (donut)
+        data: {
+            labels: ['Concluídos', 'Lendo', 'Não Iniciados'],
+            datasets: [{
+                label: 'Livros',
+                data: [
+                    {{ estatisticas.livros_concluidos }},
+                    {{ estatisticas.livros_lendo }},
+                    {{ estatisticas.total_livros|add:"-"|add:estatisticas.livros_concluidos|add:"-"|add:estatisticas.livros_lendo }}
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)',  // Verde (concluídos)
+                    'rgba(23, 162, 184, 0.8)', // Azul (lendo)
+                    'rgba(108, 117, 125, 0.8)' // Cinza (não iniciados)
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(23, 162, 184, 1)',
+                    'rgba(108, 117, 125, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.parsed + ' livros';
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'nomeapp/base.html' %}
+{% extends 'leia_bem/base.html' %}
 
 <!-- O título que aparece na aba do navegador -->
 {% block title %}Livros - Gerenciador de Leitura{% endblock %}
@@ -85,7 +85,7 @@
 {% if livros %}
     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
         {% for livro in livros %}
-            <div class="col">
+            <div class="col" data-aos="fade-up">
                 <!-- Card do livro -->
                 <div class="card card-livro h-100 shadow-sm">
                     <!-- Imagem da capa -->

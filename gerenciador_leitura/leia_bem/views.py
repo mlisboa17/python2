@@ -15,7 +15,7 @@ def index(request):
     context = {
         'livros_destaque': livros_destaque,
     }
-    return render(request, 'nomeapp/index.html', context)
+    return render(request, 'leia_bem/index.html', context)
 
 
 def lista_livros(request):
@@ -39,7 +39,7 @@ def lista_livros(request):
         'livros': livros,
         'query': query,
     }
-    return render(request, 'nomeapp/lista_livros.html', context)
+    return render(request, 'leia_bem/lista_livros.html', context)
 
 
 def detalhe_livro(request, livro_id):
@@ -67,7 +67,7 @@ def detalhe_livro(request, livro_id):
         'progresso': progresso,
         'avaliacao_usuario': avaliacao_usuario,
     }
-    return render(request, 'nomeapp/detalhe_livro.html', context)
+    return render(request, 'leia_bem/detalhe_livro.html', context)
 
 
 @login_required
@@ -83,7 +83,7 @@ def meus_livros(request):
     context = {
         'progressos': progressos,
     }
-    return render(request, 'nomeapp/meus_livros.html', context)
+    return render(request, 'leia_bem/meus_livros.html', context)
 
 
 @login_required
@@ -249,7 +249,7 @@ def ranking_pontos(request):
     context = {
         'ranking': usuarios_com_pontos,
     }
-    return render(request, 'nomeapp/ranking.html', context)
+    return render(request, 'leia_bem/ranking.html', context)
 
 
 @login_required
@@ -277,7 +277,7 @@ def perfil_usuario(request):
         'progressos_recentes': progressos.order_by('-atualizado')[:5],
         'avaliacoes_recentes': avaliacoes.order_by('-criado')[:5],
     }
-    return render(request, 'nomeapp/perfil.html', context)
+    return render(request, 'leia_bem/perfil.html', context)
 
 
 @login_required
@@ -325,7 +325,7 @@ def celebrar_conclusao(request, progresso_id):
         'livros_concluidos': livros_concluidos,
     }
     
-    return render(request, 'nomeapp/celebracao.html', context)
+    return render(request, 'leia_bem/celebracao.html', context)
 
 
 def signup(request):
@@ -368,5 +368,5 @@ def signup(request):
         form = SignUpForm()
     
     # Envia o formulário pro template
-    return render(request, 'nomeapp/signup.html', {'form': form})
-    return render(request, 'nomeapp/perfil.html', context)
+    return render(request, 'leia_bem/signup.html', {'form': form})
+    return render(request, 'leia_bem/perfil.html', context)

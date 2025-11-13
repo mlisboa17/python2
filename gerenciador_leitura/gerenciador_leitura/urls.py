@@ -28,9 +28,9 @@ urlpatterns = [
     # TODAS AS PÁGINAS DO APP DE LEITURA
     # ==========================================
     # Aqui a gente "importa" todas as rotas que criamos no arquivo urls.py do nosso app
-    # É tipo dizer: "tudo que começar com nada (''), usa as URLs que tão lá em nomeapp/urls.py"
+    # É tipo dizer: "tudo que começar com nada (''), usa as URLs que tão lá em leia_bem/urls.py"
     # Então se lá tem 'livros/', aqui vai virar '/livros/'
-    path('', include('nomeapp.urls')),
+    path('', include('leia_bem.urls')),
     
     
     # ==========================================
