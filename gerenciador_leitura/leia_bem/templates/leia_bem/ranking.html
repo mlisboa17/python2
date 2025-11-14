@@ -6,34 +6,34 @@
 {% block content %}
 <!-- 
     =============================================
-    RANKING DE PONTOS
+    RANKING DE Janjetas
     Tabela com os maiores leitores do sistema
     =============================================
 -->
 <div class="row mb-4">
     <div class="col">
         <h1>
-            <i class="fas fa-trophy text-warning"></i> Ranking de Leitores
+            <img src="/media/janjetas.png" alt="Janjetas" style="width: 50px; height: 50px; vertical-align: middle; margin-right: 10px;"> Ranking de Leitores
         </h1>
-        <p class="text-muted">Os leitores mais dedicados e com mais pontos!</p>
+        <p class="text-muted">Os leitores mais dedicados e com mais Janjetas $!</p>
     </div>
 </div>
 
 <!-- 
     =============================================
-    INFORMAÇÃO SOBRE PONTOS
-    Explica como ganhar pontos
+    INFORMAÇÃO SOBRE Janjetas
+    Explica como ganhar Janjetas
     =============================================
 -->
 <div class="alert alert-info mb-4">
     <h5 class="alert-heading">
-        <i class="fas fa-info-circle"></i> Como ganhar pontos?
+        <i class="fas fa-info-circle"></i> Como ganhar Janjetas?
     </h5>
     <ul class="mb-0">
-        <li><strong>Registre sessões de leitura:</strong> Ganhe 5 pontos base por sessão</li>
-        <li><strong>Leia todos os dias:</strong> Ganhe bônus de até 15 pontos por sequência diária!</li>
-        <li><strong>Avalie livros:</strong> Ganhe 3 pontos ao avaliar um livro pela primeira vez</li>
-        <li><strong>Complete páginas:</strong> Cada página lida vale pontos!</li>
+        <li><strong>Registre sessões de leitura:</strong> Ganhe 5 Janjetas base por sessão</li>
+        <li><strong>Leia todos os dias:</strong> Ganhe bônus de até 15 Janjetas por sequência diária!</li>
+        <li><strong>Avalie livros:</strong> Ganhe 3 Janjetas ao avaliar um livro pela primeira vez</li>
+        <li><strong>Complete páginas:</strong> Cada página lida vale Janjetas!</li>
     </ul>
 </div>
 
@@ -75,15 +75,15 @@
                             {% endif %}
                         </h4>
 
-                        <!-- Pontos -->
+                        <!-- Janjetas -->
                         <div class="mt-3">
                             <h2 class="
                                 {% if forloop.counter == 1 %}text-warning
                                 {% elif forloop.counter == 2 %}text-secondary
                                 {% else %}text-danger{% endif %}">
-                                {{ usuario.total_pontos|default:0 }}
+                                <i class="fas fa-coins" style="color: #FFD700;"></i> {{ usuario.total_pontos|default:0 }}
                             </h2>
-                            <p class="text-muted mb-0">pontos</p>
+                            <p class="text-muted mb-0">Janjetas</p>
                         </div>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                         <tr>
                             <th class="text-center" style="width: 80px;">Posição</th>
                             <th>Leitor</th>
-                            <th class="text-center">Pontos</th>
+                            <th class="text-center"><i class="fas fa-coins text-warning"></i> Janjetas</th>
                             <th class="text-center">Livros</th>
                         </tr>
                     </thead>
@@ -153,16 +153,14 @@
                                     {% endif %}
                                 </td>
 
-                                <!-- Pontos totais -->
+                                <!-- Janjetas totais -->
                                 <td class="text-center">
                                     <strong class="
                                         {% if forloop.counter == 1 %}text-warning
                                         {% elif forloop.counter == 2 %}text-secondary
                                         {% elif forloop.counter == 3 %}text-danger{% endif %}">
-                                        {{ usuario.total_pontos|default:0 }}
+                                        <i class="fas fa-coins" style="color: #FFD700;"></i> {{ usuario.total_pontos|default:0 }}
                                     </strong>
-                                    <br>
-                                    <small class="text-muted">pontos</small>
                                 </td>
 
                                 <!-- Contagem de livros (aproximado) -->
@@ -198,3 +196,4 @@
     </a>
 </div>
 {% endblock %}
+

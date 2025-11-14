@@ -33,6 +33,24 @@
         50% { transform: scale(1.05); }
     }
     
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3) translateY(-50px);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
     .card-celebracao {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -85,6 +103,85 @@
             <div class="col-lg-8">
                 <!-- 
                     ==========================================
+                    CARD GIGANTE DE JANJETAS GANHOS
+                    ==========================================
+                -->
+                <div class="card border-warning shadow-lg mb-4" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-width: 3px;">
+                    <div class="card-body text-center p-5">
+                        <div style="animation: bounceIn 1s;">
+                            <h2 class="text-white mb-3">
+                                <i class="fas fa-coins fa-3x mb-3" style="color: #ffd700;"></i>
+                            </h2>
+                            <h1 class="display-1 fw-bold text-white mb-2" style="font-size: 5rem; text-shadow: 4px 4px 8px rgba(0,0,0,0.3);">
+                                +{{ progresso.pontos }}
+                            </h1>
+                            <h2 class="text-white fw-bold mb-3" style="font-size: 2.5rem;">
+                                JANJETAS! 🎉
+                            </h2>
+                            <p class="lead text-white mb-0" style="font-size: 1.3rem;">
+                                Você ganhou <strong>{{ progresso.pontos }} Janjetas</strong> ao concluir este livro!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 
+                    ==========================================
+                    CARD MEGA CELEBRAÇÃO DE PÓDIO 🏆
+                    Aparece apenas se entrou no TOP 3!
+                    ==========================================
+                -->
+                {% if entrou_no_podio %}
+                <div class="card border-warning shadow-lg mb-4" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); border-width: 5px; animation: bounceIn 1.5s;">
+                    <div class="card-body text-center p-5">
+                        <div style="animation: pulse 2s infinite;">
+                            {% if posicao_podio == 1 %}
+                                <h1 class="display-1 mb-3" style="font-size: 6rem;">🥇</h1>
+                                <h1 class="text-white fw-bold mb-3" style="font-size: 3rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">
+                                    VOCÊ É O NÚMERO 1! 👑
+                                </h1>
+                            {% elif posicao_podio == 2 %}
+                                <h1 class="display-1 mb-3" style="font-size: 6rem;">🥈</h1>
+                                <h1 class="text-white fw-bold mb-3" style="font-size: 3rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">
+                                    PRATA! 2º LUGAR! 🎊
+                                </h1>
+                            {% elif posicao_podio == 3 %}
+                                <h1 class="display-1 mb-3" style="font-size: 6rem;">🥉</h1>
+                                <h1 class="text-white fw-bold mb-3" style="font-size: 3rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">
+                                    BRONZE! 3º LUGAR! 🎉
+                                </h1>
+                            {% endif %}
+                            
+                            <div class="bg-white bg-opacity-25 rounded-4 p-4 mt-4">
+                                <h2 class="text-white mb-3">
+                                    <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                                </h2>
+                                <h1 class="display-2 fw-bold text-white mb-2" style="font-size: 4.5rem; text-shadow: 4px 4px 8px rgba(0,0,0,0.3);">
+                                    +{{ bonus_podio }}
+                                </h1>
+                                <h2 class="text-white fw-bold mb-3" style="font-size: 2rem;">
+                                    JANJETAS DE BÔNUS! 💰
+                                </h2>
+                                <p class="lead text-white mb-0" style="font-size: 1.2rem;">
+                                    Você entrou no <strong>PÓDIO</strong> e ganhou um bônus especial!
+                                </p>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h3 class="text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                                    🎊 PARABÉNS CAMPEÃO! 🎊
+                                </h3>
+                                <p class="text-white lead">
+                                    Continue lendo para manter sua posição no topo!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- 
+                    ==========================================
                     CARD PRINCIPAL DE CELEBRAÇÃO
                     ==========================================
                 -->
@@ -114,7 +211,7 @@
                                 <div class="stat-box">
                                     <i class="fas fa-trophy fa-2x mb-2"></i>
                                     <h4>{{ total_pontos }}</h4>
-                                    <p class="mb-0">Pontos Totais</p>
+                                    <p class="mb-0">Janjetas Totais</p>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -233,46 +330,75 @@ document.addEventListener('DOMContentLoaded', function() {
         useWorker: true
     });
     
-    // Função para jogar confetes
-    function jogarConfetes() {
+    // Função para jogar confetes SUPER INTENSOS
+    function jogarConfetesGrandes() {
         myConfetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
+            particleCount: 200,
+            spread: 160,
+            origin: { y: 0.6 },
+            colors: ['#ffd700', '#ff1493', '#00ff00', '#00bfff', '#ff6347', '#9370db'],
+            scalar: 1.2
         });
     }
     
-    // Joga confetes logo que a página carrega
-    jogarConfetes();
+    // EXPLOSÃO INICIAL GIGANTE!
+    jogarConfetesGrandes();
     
-    // Joga mais confetes depois de 0.3 segundos
-    setTimeout(jogarConfetes, 300);
+    // Segunda explosão
+    setTimeout(jogarConfetesGrandes, 400);
     
-    // E mais uma vez depois de 0.6 segundos (efeito triplo!)
-    setTimeout(jogarConfetes, 600);
+    // Terceira explosão (efeito triplo!)
+    setTimeout(jogarConfetesGrandes, 800);
     
-    // Confetes contínuos por 3 segundos
-    var duration = 3 * 1000;
+    // Confetes contínuos caindo dos lados por 5 segundos
+    var duration = 5 * 1000;
     var end = Date.now() + duration;
     
     (function frame() {
+        // Confetes da esquerda
         myConfetti({
-            particleCount: 3,
+            particleCount: 5,
             angle: 60,
             spread: 55,
-            origin: { x: 0 }
+            origin: { x: 0, y: 0.5 },
+            colors: ['#ffd700', '#ff1493', '#00ff00', '#00bfff']
         });
+        
+        // Confetes da direita
         myConfetti({
-            particleCount: 3,
+            particleCount: 5,
             angle: 120,
             spread: 55,
-            origin: { x: 1 }
+            origin: { x: 1, y: 0.5 },
+            colors: ['#ff6347', '#9370db', '#ffd700', '#00bfff']
+        });
+        
+        // Confetes do centro caindo
+        myConfetti({
+            particleCount: 2,
+            angle: 90,
+            spread: 45,
+            origin: { x: 0.5, y: 0 },
+            colors: ['#ffd700', '#ff1493']
         });
 
         if (Date.now() < end) {
             requestAnimationFrame(frame);
         }
     }());
+    
+    // EXPLOSÃO FINAL aos 5 segundos
+    setTimeout(function() {
+        myConfetti({
+            particleCount: 150,
+            spread: 180,
+            origin: { y: 0.5 },
+            colors: ['#ffd700', '#ff1493', '#00ff00', '#00bfff', '#ff6347', '#9370db'],
+            scalar: 1.5,
+            gravity: 0.8
+        });
+    }, 5000);
 });
 </script>
 {% endblock %}
+

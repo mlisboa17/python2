@@ -82,8 +82,8 @@ class Migration(migrations.Migration):
                 ('capa', models.ImageField(blank=True, upload_to='livros/capas/')),
                 ('nota_media', models.DecimalField(decimal_places=2, default=0.0, max_digits=3)),
                 ('total_avaliacoes', models.PositiveIntegerField(default=0)),
-                ('editora', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='nomeapp.editora')),
-                ('escritor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='livros', to='nomeapp.escritor')),
+                ('editora', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='leia_bem.editora')),
+                ('escritor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='livros', to='leia_bem.escritor')),
             ],
             options={
                 'db_table': 'livro',
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                 ('criado', models.DateTimeField(auto_now_add=True)),
                 ('atualizado', models.DateTimeField(auto_now=True)),
                 ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('livro', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='avaliacoes', to='nomeapp.livro')),
+                ('livro', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='avaliacoes', to='leia_bem.livro')),
             ],
             options={
                 'db_table': 'avaliacao',
@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
                 ('total_sessoes', models.PositiveIntegerField(default=0)),
                 ('maior_sequencia_diaria', models.PositiveIntegerField(default=0)),
                 ('sequencia_atual', models.PositiveIntegerField(default=0)),
-                ('livro', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='nomeapp.livro')),
+                ('livro', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='leia_bem.livro')),
                 ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={

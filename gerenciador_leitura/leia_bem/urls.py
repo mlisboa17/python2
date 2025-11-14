@@ -6,13 +6,13 @@ urlpatterns = [
     # PÁGINAS PÚBLICAS - Qualquer pessoa pode acessar
     # ==========================================
     
-    # Página inicial do site - mostra os livros em destaque
+    # Página inicial do site
     path('', views.index, name='index'),
     
     # Página de cadastro - cria uma nova conta
     path('cadastro/', views.signup, name='signup'),
     
-    # Lista completa de livros disponíveis - permite buscar e filtrar
+    # Lista completa de livros disponíveis - mostra todos os livros no sistema
     path('livros/', views.lista_livros, name='lista_livros'),
     
     # Página de detalhes de um livro específico - mostra informações completas e avaliações

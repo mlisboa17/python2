@@ -36,7 +36,7 @@
                     <!-- Se o usuário está logado, mostra botões de ação -->
                     
                     {% if progresso %}
-                        <!-- Já tem esse livro na lista -->
+                        <!-- Já adicionou -->
                         <div class="alert alert-success mb-3">
                             <i class="fas fa-check-circle"></i> 
                             Este livro está na sua lista!
@@ -46,20 +46,57 @@
                         </a>
                     {% else %}
                         <!-- Ainda não adicionou -->
-                        <a href="{% url 'adicionar_livro_leitura' livro.id %}" class="btn btn-success w-100 mb-2">
-                            <i class="fas fa-plus"></i> Adicionar à Minha Lista
-                        </a>
+                        <form method="post" action="{% url 'adicionar_livro_leitura' livro.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-plus"></i> Adicionar à Minha Lista
+                            </button>
+                        </form>
                     {% endif %}
                     
-                    <!-- Botão de avaliar -->
-                    <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#modalAvaliacao">
-                        <i class="fas fa-star"></i> 
-                        {% if avaliacao_usuario %}
-                            Editar Minha Avaliação
-                        {% else %}
-                            Avaliar Este Livro
-                        {% endif %}
-                    </button>
+                    <!-- Botão de avaliar - só aparece se terminou de ler -->
+                    {% if pode_avaliar %}
+                        <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#modalAvaliacao">
+                            <i class="fas fa-star"></i> 
+                            {% if avaliacao_usuario %}
+                                Editar Minha Avaliação
+                            {% else %}
+                                Avaliar Este Livro
+                            {% endif %}
+                        </button>
+                    {% elif progresso and progresso.status != 'CONCLUIDO' %}
+                        <!-- Se adicionou mas não terminou, mostra card motivacional com paródias -->
+                        <div class="card border-warning mt-2 mb-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-book-reader fa-2x text-warning mb-2"></i>
+                                <p class="mb-2 fw-bold text-warning" style="font-size: 0.9rem;">{{ parodia_motivacional }}</p>
+                                <p class="small text-muted mb-0">
+                                    🎯 Complete sua leitura e ganhe o poder de avaliar + Janjetas extras! 🎉
+                                </p>
+                                {% if progresso.porcentagem > 0 %}
+                                    <div class="progress mt-3" style="height: 8px;">
+                                        <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" 
+                                             style="width: {{ progresso.porcentagem }}%" 
+                                             aria-valuenow="{{ progresso.porcentagem }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        <strong>{{ progresso.porcentagem|floatformat:0 }}%</strong> concluído 
+                                        {% if progresso.porcentagem >= 80 %}
+                                            - Tá quase! 💪
+                                        {% elif progresso.porcentagem >= 50 %}
+                                            - Na metade do caminho! 📖
+                                        {% elif progresso.porcentagem >= 20 %}
+                                            - Bom começo! 🚀
+                                        {% else %}
+                                            - Vamos lá! 📚
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
                 {% else %}
                     <!-- Se não está logado, pede pra fazer login -->
                     <div class="alert alert-info">
@@ -188,7 +225,7 @@
                             <p><strong>Página Atual:</strong> {{ progresso.pagina_atual }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Pontos:</strong> {{ progresso.pontos }} pts</p>
+                            <p><strong>Janjetas:</strong> {{ progresso.Janjetas }} $</p>
                             <p><strong>Progresso:</strong> {{ progresso.porcentagem }}%</p>
                         </div>
                     </div>
@@ -321,3 +358,4 @@
     </div>
 </div>
 {% endblock %}
+

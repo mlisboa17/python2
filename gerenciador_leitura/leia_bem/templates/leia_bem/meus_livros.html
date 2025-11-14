@@ -114,26 +114,32 @@
                                         de {{ progresso.livro.numero_paginas }}
                                     {% endif %}
                                     <br>
-                                    <i class="fas fa-trophy"></i> {{ progresso.pontos }} pontos
+                                    <i class="fas fa-trophy"></i> {{ progresso.Janjetas }} Janjetas
                                 </div>
 
                                 <!-- Botões de ação -->
-                                <div class="btn-group w-100" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalAtualizar{{ progresso.id }}">
-                                        <i class="fas fa-edit"></i> Atualizar
+                                {% if progresso.status != 'CONCLUIDO' %}
+                                    <div class="btn-group w-100 mb-2" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalAtualizar{{ progresso.id }}">
+                                            <i class="fas fa-edit"></i> Atualizar
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalSessao{{ progresso.id }}">
+                                            <i class="fas fa-clock"></i> Sessão
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-success w-100 mb-2" disabled>
+                                        <i class="fas fa-check-circle"></i> Concluído
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-success"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalSessao{{ progresso.id }}">
-                                        <i class="fas fa-clock"></i> Sessão
-                                    </button>
-                                    <a href="{% url 'detalhe_livro' progresso.livro.id %}" 
-                                       class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-eye"></i> Detalhes
-                                    </a>
-                                </div>
+                                {% endif %}
+                                <a href="{% url 'detalhe_livro' progresso.livro.id %}" 
+                                   class="btn btn-sm btn-outline-secondary w-100">
+                                    <i class="fas fa-eye"></i> Detalhes
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -247,13 +253,13 @@
                                         </small>
                                     </div>
 
-                                    <!-- Informações sobre pontos -->
+                                    <!-- Informações sobre Janjetas -->
                                     <div class="alert alert-success">
                                         <i class="fas fa-trophy"></i> <strong>Você vai ganhar:</strong>
                                         <ul class="mb-0 mt-2">
-                                            <li>Pontos pelas páginas lidas</li>
-                                            <li>Pontos pela sessão de leitura (5 pts base)</li>
-                                            <li>Bônus se ler dias seguidos (até +15 pts!)</li>
+                                            <li>Janjetas pelas páginas lidas</li>
+                                            <li>Janjetas pela sessão de leitura (5 $ base)</li>
+                                            <li>Bônus se ler dias seguidos (até +15 $!)</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -317,3 +323,4 @@ document.querySelectorAll('form[action*="atualizar"]').forEach(form => {
 });
 </script>
 {% endblock %}
+

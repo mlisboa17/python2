@@ -43,7 +43,7 @@ class Editora(models.Model):
 
 class Escritor(models.Model):
     nome = models.CharField(max_length=200)
-    email = models.EmailField(unique=True, blank=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     bibliografia = models.TextField(blank=True)
     foto = models.ImageField(upload_to="escritores/fotos/", blank=True)
 
@@ -62,12 +62,21 @@ PONTOS_BASE_POR_SESSAO = 5
 BONUS_DIARIO_CONSECUTIVO = 3
 MAX_BONUS_CONSECUTIVO = 15
 
+# Novo Sistema de Janjetas
+JANJETAS_POR_PAGINA = 0.01  # Cada página lida = 0.01 Janjetas
+JANJETAS_BONUS_CONCLUSAO = 0.10  # Ao terminar: páginas * 0.10 Janjetas
+JANJETAS_PODIO_TERCEIRO = 50.00  # Bônus 3º lugar
+JANJETAS_PODIO_SEGUNDO = 100.00  # Bônus 2º lugar
+JANJETAS_PODIO_PRIMEIRO = 300.00  # Bônus 1º lugar
+
 class Livro(models.Model):
     titulo = models.CharField(max_length=300)
     editora = models.ForeignKey("Editora", on_delete=models.SET_NULL, null=True, blank=True)
     escritor = models.ForeignKey("Escritor", on_delete=models.SET_NULL, null=True, blank=True, related_name="livros")
     ano_publicacao = models.PositiveSmallIntegerField(null=True, blank=True)
     numero_paginas = models.PositiveIntegerField(null=True, blank=True)
+    sinopse = models.TextField(blank=True)
+    isbn = models.CharField(max_length=20, blank=True)
     capa = models.ImageField(upload_to="livros/capas/", blank=True)
 
     nota_media = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
@@ -106,7 +115,7 @@ class ProgressoLeitura(models.Model):
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
     pagina_atual = models.PositiveIntegerField(default=0)
     porcentagem = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    pontos = models.IntegerField(default=0)
+    pontos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Mudado para decimal
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="LENDO")
     atualizado = models.DateTimeField(auto_now=True)
 
@@ -124,18 +133,37 @@ class ProgressoLeitura(models.Model):
     def __str__(self):
         return f"{self.usuario} - {self.livro} ({self.porcentagem}%)"
 
-    def atualizar_por_pagina(self, pagina, pontos_por_pagina=1):
+    def atualizar_por_pagina(self, pagina, pontos_por_pagina=JANJETAS_POR_PAGINA):
+        """Atualiza progresso por página. Retorna True se acabou de concluir o livro."""
+        from decimal import Decimal
+        
+        estava_incompleto = self.status != "CONCLUIDO"
         self.pagina_atual = max(0, int(pagina))
+        
         if self.livro.numero_paginas:
             porcent = (self.pagina_atual / self.livro.numero_paginas) * 100
             self.porcentagem = round(porcent, 2)
         else:
             self.porcentagem = 0.00
-        self.pontos = int(self.pagina_atual * pontos_por_pagina)
-        if self.porcentagem >= 100:
+        
+        # Calcula Janjetas: páginas lidas * 0.01
+        self.pontos = Decimal(str(self.pagina_atual)) * Decimal(str(pontos_por_pagina))
+        
+        # Se completou agora, adiciona bônus de conclusão
+        acabou_de_concluir = False
+        if self.porcentagem >= 100 and estava_incompleto:
             self.status = "CONCLUIDO"
+            # Bônus: número de páginas * 0.10
+            bonus_conclusao = Decimal(str(self.livro.numero_paginas)) * Decimal(str(JANJETAS_BONUS_CONCLUSAO))
+            self.pontos += bonus_conclusao
+            acabou_de_concluir = True
+        elif self.porcentagem >= 100:
+            self.status = "CONCLUIDO"
+            
         self.atualizado = timezone.now()
         self.save(update_fields=["pagina_atual", "porcentagem", "pontos", "status", "atualizado"])
+        
+        return acabou_de_concluir
 
     def registrar_sessao(self, timestamp=None, duracao_minutos=None):
         now = timestamp or timezone.now()

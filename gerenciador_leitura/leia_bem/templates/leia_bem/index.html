@@ -1,7 +1,7 @@
 {% extends 'leia_bem/base.html' %}
 
 <!-- O título que aparece na aba do navegador -->
-{% block title %}Início - Gerenciador de Leitura{% endblock %}
+{% block title %}Início - Leia Bem{% endblock %}
 
 {% block content %}
 <!-- 
@@ -13,10 +13,10 @@
 <div class="jumbotron bg-light p-5 rounded-3 mb-4" data-aos="fade-up">
     <div class="container-fluid py-5">
         <h1 class="display-4">
-            <i class="fas fa-book-reader"></i> Bem-vindo ao Gerenciador de Leitura!
+            <i class="fas fa-book-reader"></i> Bem-vindo ao Leia Bem!
         </h1>
         <p class="lead">
-            Acompanhe suas leituras, ganhe pontos e compartilhe suas experiências com livros! 📚
+            Aqui o povo lê... e recebe! Acompanhe suas leituras, ganhe Janjetas e compartilhe suas experiências! 📚
         </p>
         <hr class="my-4">
         <p>
@@ -116,7 +116,21 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Botão para ver detalhes -->
+                            <!-- Botões -->
+                            {% if user.is_authenticated %}
+                                {% if livro.id in livros_na_biblioteca %}
+                                    <button class="btn btn-sm btn-secondary w-100 mb-1" disabled>
+                                        <i class="fas fa-check"></i> Adicionado
+                                    </button>
+                                {% else %}
+                                    <form method="post" action="{% url 'adicionar_livro_leitura' livro.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success w-100 mb-1">
+                                            <i class="fas fa-plus"></i> Adicionar
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
                             <a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-sm btn-outline-primary w-100">
                                 <i class="fas fa-info-circle"></i> Ver Detalhes
                             </a>
@@ -159,11 +173,11 @@
         <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
                 <div class="mb-3">
-                    <i class="fas fa-trophy fa-3x text-warning"></i>
+                    <img src="/media/janjetas.png" alt="Janjetas" style="width: 60px; height: 60px;">
                 </div>
-                <h5 class="card-title">Sistema de Pontos</h5>
+                <h5 class="card-title">Sistema de Janjetas</h5>
                 <p class="card-text">
-                    Ganhe pontos lendo todos os dias e suba no ranking dos melhores leitores!
+                    Ganhe Janjetas $ lendo todos os dias e suba no ranking dos melhores leitores!
                 </p>
             </div>
         </div>
@@ -184,3 +198,4 @@
     </div>
 </div>
 {% endblock %}
+
