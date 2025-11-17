@@ -117,3 +117,68 @@ class SignUpForm(UserCreationForm):
             user.save()
         
         return user
+
+
+from .models import Livro, Escritor, Editora
+
+class LivroForm(forms.ModelForm):
+    """Formulário para criar/editar livros"""
+    class Meta:
+        model = Livro
+        fields = ['titulo', 'escritor', 'editora', 'ano_publicacao', 'numero_paginas', 'sinopse', 'isbn', 'capa']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título do livro'}),
+            'escritor': forms.Select(attrs={'class': 'form-select'}),
+            'editora': forms.Select(attrs={'class': 'form-select'}),
+            'ano_publicacao': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '2024'}),
+            'numero_paginas': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '300'}),
+            'sinopse': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Sinopse do livro...'}),
+            'isbn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ISBN'}),
+            'capa': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'titulo': 'Título',
+            'escritor': 'Escritor(a)',
+            'editora': 'Editora',
+            'ano_publicacao': 'Ano de Publicação',
+            'numero_paginas': 'Número de Páginas',
+            'sinopse': 'Sinopse',
+            'isbn': 'ISBN',
+            'capa': 'Capa do Livro',
+        }
+
+
+class EscritorForm(forms.ModelForm):
+    """Formulário para criar/editar escritores"""
+    class Meta:
+        model = Escritor
+        fields = ['nome', 'email', 'bibliografia', 'foto']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome completo'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@escritor.com'}),
+            'bibliografia': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Biografia do escritor...'}),
+            'foto': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'nome': 'Nome',
+            'email': 'E-mail',
+            'bibliografia': 'Biografia',
+            'foto': 'Foto',
+        }
+
+
+class EditoraForm(forms.ModelForm):
+    """Formulário para criar/editar editoras"""
+    class Meta:
+        model = Editora
+        fields = ['nome', 'site', 'telefone']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da editora'}),
+            'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.editora.com.br'}),
+            'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 98765-4321'}),
+        }
+        labels = {
+            'nome': 'Nome',
+            'site': 'Site',
+            'telefone': 'Telefone',
+        }

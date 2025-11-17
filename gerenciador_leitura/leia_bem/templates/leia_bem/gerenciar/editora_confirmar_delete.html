@@ -1,0 +1,39 @@
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Confirmar Exclusão - Leia Bem{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão</h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                    <h4>{{ editora.nome }}</h4>
+                    {% if editora.site %}
+                        <p class="text-muted">{{ editora.site }}</p>
+                    {% endif %}
+                    
+                    <div class="alert alert-warning">
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                        Todos os dados relacionados à editora serão perdidos.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Sim, deletar esta editora
+                        </button>
+                        <a href="{% url 'gerenciar_editoras' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -67,5 +67,30 @@ urlpatterns = [
     
     # Página de celebração quando conclui um livro - CONFETES! 🎉
     path('celebracao/<int:progresso_id>/', views.celebrar_conclusao, name='celebrar_conclusao'),
+    
+    
+    # ==========================================
+    # GERENCIAMENTO - Apenas para superusuários (staff)
+    # ==========================================
+    
+    # Dashboard de gerenciamento
+    path('gerenciar/', views.gerenciar_dashboard, name='gerenciar_dashboard'),
+    
+    # CRUD Livros
+    path('gerenciar/livros/', views.gerenciar_livros, name='gerenciar_livros'),
+    path('gerenciar/livros/criar/', views.criar_livro, name='criar_livro'),
+    path('gerenciar/livros/<int:livro_id>/editar/', views.editar_livro, name='editar_livro'),
+    path('gerenciar/livros/<int:livro_id>/deletar/', views.deletar_livro, name='deletar_livro'),
+    
+    # CRUD Escritores
+    path('gerenciar/escritores/', views.gerenciar_escritores, name='gerenciar_escritores'),
+    path('gerenciar/escritores/criar/', views.criar_escritor, name='criar_escritor'),
+    path('gerenciar/escritores/<int:escritor_id>/editar/', views.editar_escritor, name='editar_escritor'),
+    path('gerenciar/escritores/<int:escritor_id>/deletar/', views.deletar_escritor, name='deletar_escritor'),
+    
+    # CRUD Editoras
+    path('gerenciar/editoras/', views.gerenciar_editoras, name='gerenciar_editoras'),
+    path('gerenciar/editoras/criar/', views.criar_editora, name='criar_editora'),
+    path('gerenciar/editoras/<int:editora_id>/editar/', views.editar_editora, name='editar_editora'),
+    path('gerenciar/editoras/<int:editora_id>/deletar/', views.deletar_editora, name='deletar_editora'),
 ]
-

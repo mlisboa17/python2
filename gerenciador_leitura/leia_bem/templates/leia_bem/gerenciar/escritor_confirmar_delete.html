@@ -1,0 +1,41 @@
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Confirmar Exclusão - Leia Bem{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if escritor.foto %}
+                        <img src="{{ escritor.foto.url }}" alt="{{ escritor.nome }}" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% endif %}
+                    <h4>{{ escritor.nome }}</h4>
+                    {% if escritor.email %}
+                        <p class="text-muted">{{ escritor.email }}</p>
+                    {% endif %}
+                    
+                    <div class="alert alert-warning">
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                        Todos os dados relacionados ao escritor serão perdidos.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Sim, deletar este escritor
+                        </button>
+                        <a href="{% url 'gerenciar_escritores' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

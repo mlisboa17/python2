@@ -1,0 +1,116 @@
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Gerenciamento - Leia Bem{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="fas fa-tools"></i> Painel de Gerenciamento</h1>
+            <p class="text-muted">Área exclusiva para administradores</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                    <h3>{{ estatisticas.total_livros }}</h3>
+                    <p class="text-muted">Livros</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <i class="fas fa-pen-fancy fa-3x text-success mb-3"></i>
+                    <h3>{{ estatisticas.total_escritores }}</h3>
+                    <p class="text-muted">Escritores</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <i class="fas fa-building fa-3x text-warning mb-3"></i>
+                    <h3>{{ estatisticas.total_editoras }}</h3>
+                    <p class="text-muted">Editoras</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                    <h3>{{ estatisticas.total_usuarios }}</h3>
+                    <p class="text-muted">Usuários</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu de Gerenciamento -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-book"></i> Livros</h5>
+                </div>
+                <div class="card-body">
+                    <p>Gerencie todos os livros cadastrados no sistema</p>
+                    <a href="{% url 'gerenciar_livros' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-list"></i> Ver Livros
+                    </a>
+                    <a href="{% url 'criar_livro' %}" class="btn btn-outline-primary w-100 mt-2">
+                        <i class="fas fa-plus"></i> Adicionar Livro
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-pen-fancy"></i> Escritores</h5>
+                </div>
+                <div class="card-body">
+                    <p>Gerencie os escritores e suas informações</p>
+                    <a href="{% url 'gerenciar_escritores' %}" class="btn btn-success w-100">
+                        <i class="fas fa-list"></i> Ver Escritores
+                    </a>
+                    <a href="{% url 'criar_escritor' %}" class="btn btn-outline-success w-100 mt-2">
+                        <i class="fas fa-plus"></i> Adicionar Escritor
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-building"></i> Editoras</h5>
+                </div>
+                <div class="card-body">
+                    <p>Gerencie as editoras cadastradas</p>
+                    <a href="{% url 'gerenciar_editoras' %}" class="btn btn-warning w-100">
+                        <i class="fas fa-list"></i> Ver Editoras
+                    </a>
+                    <a href="{% url 'criar_editora' %}" class="btn btn-outline-warning w-100 mt-2">
+                        <i class="fas fa-plus"></i> Adicionar Editora
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col">
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar para o Site
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Gerenciar Escritores - Leia Bem{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="fas fa-pen-fancy"></i> Gerenciar Escritores</h1>
+            <a href="{% url 'criar_escritor' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Adicionar Novo Escritor
+            </a>
+            <a href="{% url 'gerenciar_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for escritor in escritores %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if escritor.foto %}
+                            <img src="{{ escritor.foto.url }}" alt="{{ escritor.nome }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-user text-white fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        <div class="ms-3">
+                            <h5 class="mb-0">{{ escritor.nome }}</h5>
+                            <small class="text-muted">{{ escritor.total_livros }} livro{{ escritor.total_livros|pluralize }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if escritor.email %}
+                        <p class="mb-2"><i class="fas fa-envelope"></i> {{ escritor.email }}</p>
+                    {% endif %}
+                    
+                    {% if escritor.bibliografia %}
+                        <p class="text-muted small">{{ escritor.bibliografia|truncatewords:20 }}</p>
+                    {% endif %}
+
+                    <div class="btn-group w-100 mt-3">
+                        <a href="{% url 'editar_escritor' escritor.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'deletar_escritor' escritor.id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Deletar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <div class="alert alert-info">Nenhum escritor cadastrado</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

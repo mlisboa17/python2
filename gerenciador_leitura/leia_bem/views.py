@@ -61,67 +61,34 @@ def lista_livros(request):
 
 def detalhe_livro(request, livro_id):
     """Detalhes de um livro específico"""
-    import random
+    from random import choice
+    from .models import PARODIAS_MOTIVACIONAIS
     
     livro = get_object_or_404(Livro, pk=livro_id)
-    avaliacoes = livro.avaliacoes.all().order_by('-criado')
+    avaliacoes = livro.avaliacoes.select_related('usuario').order_by('-criado')
     
-    # Se usuário logado, verificar progresso e avaliação
     progresso = None
     avaliacao_usuario = None
     pode_avaliar = False
     parodia_motivacional = None
     
     if request.user.is_authenticated:
-        try:
-            progresso = ProgressoLeitura.objects.get(usuario=request.user, livro=livro)
-            # Só pode avaliar se terminou de ler (status CONCLUIDO)
-            pode_avaliar = progresso.status == 'CONCLUIDO'
-            
-            # Se não pode avaliar, escolhe uma paródia aleatória
-            if not pode_avaliar:
-                parodias = [
-                    "🚫 Tipo a Janja bloqueando conta no X: Sua avaliação tá BLOQUEADA até terminar o livro!",
-                    "⚖️ Alexandre de Moraes determinou: LEIA TUDO antes de avaliar! Decisão monocrática, sem recurso!",
-                    "🔒 O careca do INSS aprovou: Seu benefício de avaliar só sai quando terminar de ler!",
-                    "📱 Janja fez um tweet: Quem não lê até o fim não tem moral pra avaliar! #LeiaTudo",
-                    "👨‍⚖️ DECISÃO JUDICIAL: Livro incompleto = Avaliação negada! Cumpra a sentença de leitura!",
-                    "💼 INSS das avaliações: Documentação incompleta! Faltam as páginas finais do livro!",
-                    "🔨 Moraes bateu o martelo: Sem finale, sem estrelinhas! Tá na Constituição... do site!",
-                    "🗣️ A Janja falou no Twitter: Vocês têm que ler tudo primeiro pra depois avaliar, viu gente!",
-                    "📋 Careca do INSS: Seu processo de avaliação foi INDEFERIDO por falta de leitura completa!",
-                    "⚡ Janja mandou bloquear: Avaliação censurada por falta de leitura completa do livro!",
-                    "⚖️ STF votou 11x0: Sem Lei da Anistia pra quem não termina de ler! Todos os ministros concordam!",
-                    "🏛️ Barroso decretou: Diferente da Anistia, aqui NÃO tem perdão pra leitura incompleta!",
-                    "👔 Gilmar Mendes liberou todo mundo... menos você que não terminou o livro! Sem anistia aqui!",
-                    "📜 Lei da Anistia existe pra crimes políticos, mas pra avaliação sem leitura NÃO TEM PERDÃO!",
-                    "⚖️ Pleno do STF decidiu: Leitura incompleta é IMPERDOÁVEL! Nem anistia, nem habeas corpus!",
-                    "🚀 Elon Musk twittou: Even I can't help you unlock this review! Read the book first!",
-                    "⚡ Alexandre de Moraes bloqueou o X E sua avaliação! Termine o livro pra liberar!",
-                    "🌐 A briga acabou: Elon e Moraes concordam que você precisa LER TUDO antes de avaliar!",
-                    "🔐 Moraes mandou derrubar o X... e sua avaliação também caiu! Leia até o fim!",
-                    "💰 Elon pagou a multa pro X voltar, mas sua avaliação SÓ volta quando terminar o livro!",
-                    "⚖️ Moraes vs Musk: Único acordo que fizeram foi BLOQUEAR sua avaliação até ler tudo!"
-                ]
-                parodia_motivacional = random.choice(parodias)
-                
-        except ProgressoLeitura.DoesNotExist:
-            pass
+        progresso = ProgressoLeitura.objects.filter(usuario=request.user, livro=livro).first()
+        avaliacao_usuario = Avaliacao.objects.filter(usuario=request.user, livro=livro).first()
         
-        try:
-            avaliacao_usuario = Avaliacao.objects.get(usuario=request.user, livro=livro)
-        except Avaliacao.DoesNotExist:
-            pass
+        if progresso:
+            pode_avaliar = progresso.status == 'CONCLUIDO'
+            if not pode_avaliar:
+                parodia_motivacional = choice(PARODIAS_MOTIVACIONAIS)
     
-    context = {
+    return render(request, 'leia_bem/detalhe_livro.html', {
         'livro': livro,
         'avaliacoes': avaliacoes,
         'progresso': progresso,
         'avaliacao_usuario': avaliacao_usuario,
         'pode_avaliar': pode_avaliar,
         'parodia_motivacional': parodia_motivacional,
-    }
-    return render(request, 'leia_bem/detalhe_livro.html', context)
+    })
 
 
 @login_required
@@ -176,7 +143,6 @@ def atualizar_progresso(request, progresso_id):
     """Atualiza o progresso de leitura"""
     progresso = get_object_or_404(ProgressoLeitura, pk=progresso_id, usuario=request.user)
     
-    # Não permite editar se já está concluído
     if progresso.status == 'CONCLUIDO':
         messages.warning(request, 'Este livro já foi concluído e não pode ser editado!')
         return redirect('meus_livros')
@@ -184,45 +150,26 @@ def atualizar_progresso(request, progresso_id):
     if request.method == 'POST':
         pagina = request.POST.get('pagina_atual')
         status = request.POST.get('status')
-        livro_concluido = False
         
-        # Se mudou para CONCLUIDO
-        if status == 'CONCLUIDO' and progresso.status != 'CONCLUIDO':
-            # Define todas as páginas como lidas
-            if progresso.livro.numero_paginas:
-                from decimal import Decimal
-                from .models import JANJETAS_POR_PAGINA, JANJETAS_BONUS_CONCLUSAO
-                
-                progresso.pagina_atual = progresso.livro.numero_paginas
-                progresso.porcentagem = Decimal('100.00')
-                # Calcula Janjetas: todas as páginas * 0.01 + bônus de conclusão
-                progresso.pontos = (Decimal(str(progresso.livro.numero_paginas)) * Decimal(str(JANJETAS_POR_PAGINA)) + 
-                                   Decimal(str(progresso.livro.numero_paginas)) * Decimal(str(JANJETAS_BONUS_CONCLUSAO)))
-            progresso.status = 'CONCLUIDO'
-            progresso.save()
-            livro_concluido = True
-        elif pagina:
-            # Atualiza normalmente se não está marcando como concluído
+        # Se marcou como concluído manualmente
+        if status == 'CONCLUIDO':
+            progresso.atualizar_por_pagina(progresso.livro.numero_paginas or 0)
+            return redirect('celebrar_conclusao', progresso_id=progresso.id)
+        
+        # Atualiza página atual
+        if pagina:
             try:
-                pagina = int(pagina)
-                # atualizar_por_pagina agora retorna True se acabou de concluir
-                acabou_de_concluir = progresso.atualizar_por_pagina(pagina)
+                acabou_de_concluir = progresso.atualizar_por_pagina(int(pagina))
                 if acabou_de_concluir:
-                    livro_concluido = True
-                elif status and status in dict(ProgressoLeitura.STATUS_CHOICES):
-                    progresso.status = status
-                    progresso.save(update_fields=['status'])
-                    
+                    return redirect('celebrar_conclusao', progresso_id=progresso.id)
             except ValueError:
                 messages.error(request, 'Número de página inválido.')
-        elif status and status in dict(ProgressoLeitura.STATUS_CHOICES):
-            # Apenas mudou o status (sem alterar página)
+                return redirect('meus_livros')
+        
+        # Apenas muda status
+        if status in dict(ProgressoLeitura.STATUS_CHOICES):
             progresso.status = status
             progresso.save(update_fields=['status'])
-        
-        # Se concluiu o livro, redireciona para página de celebração
-        if livro_concluido:
-            return redirect('celebrar_conclusao', progresso_id=progresso.id)
         
         messages.success(request, 'Progresso atualizado com sucesso!')
     
@@ -372,11 +319,7 @@ def perfil_usuario(request):
 
 @login_required
 def celebrar_conclusao(request, progresso_id):
-    """
-    Página de celebração quando o usuário conclui um livro!
-    Mostra confetes, parabeniza e exibe a posição no ranking.
-    Se entrou no pódio, dá bônus de Janjetas!
-    """
+    """Página de celebração quando usuário conclui um livro"""
     from django.db.models import Sum
     from django.contrib.auth import get_user_model
     from decimal import Decimal
@@ -385,80 +328,43 @@ def celebrar_conclusao(request, progresso_id):
     User = get_user_model()
     progresso = get_object_or_404(ProgressoLeitura, pk=progresso_id, usuario=request.user)
     
-    # Calcula total de pontos do usuário ANTES de verificar pódio
-    total_pontos_antes = request.user.progressoleitura_set.aggregate(
-        Sum('pontos')
-    )['pontos__sum'] or Decimal('0.00')
+    # Função auxiliar para calcular ranking
+    def obter_ranking():
+        usuarios = User.objects.annotate(
+            total_pontos=Sum('progressoleitura__pontos')
+        ).filter(total_pontos__gt=0).order_by('-total_pontos')
+        
+        for idx, usuario in enumerate(usuarios, start=1):
+            if usuario.id == request.user.id:
+                return idx, usuarios.count()
+        return None, usuarios.count()
     
-    # Calcula a posição no ranking ANTES do bônus de pódio
-    usuarios_com_pontos = User.objects.annotate(
-        total_pontos=Sum('progressoleitura__pontos')
-    ).filter(total_pontos__gt=0).order_by('-total_pontos')
+    # Ranking antes do bônus
+    posicao_antiga, total_usuarios = obter_ranking()
     
-    # Encontra a posição ANTIGA do usuário
-    posicao_antiga = None
-    for idx, usuario in enumerate(usuarios_com_pontos, start=1):
-        if usuario.id == request.user.id:
-            posicao_antiga = idx
-            break
-    
-    # Verifica se entrou no pódio e aplica bônus
-    entrou_no_podio = False
+    # Aplica bônus de pódio
     bonus_podio = Decimal('0.00')
-    posicao_podio = None
+    bonus_map = {1: JANJETAS_PODIO_PRIMEIRO, 2: JANJETAS_PODIO_SEGUNDO, 3: JANJETAS_PODIO_TERCEIRO}
     
-    if posicao_antiga and posicao_antiga <= 3:
-        entrou_no_podio = True
-        posicao_podio = posicao_antiga
-        
-        # Aplica bônus baseado na posição
-        if posicao_antiga == 1:
-            bonus_podio = Decimal(str(JANJETAS_PODIO_PRIMEIRO))
-        elif posicao_antiga == 2:
-            bonus_podio = Decimal(str(JANJETAS_PODIO_SEGUNDO))
-        elif posicao_antiga == 3:
-            bonus_podio = Decimal(str(JANJETAS_PODIO_TERCEIRO))
-        
-        # Adiciona o bônus aos pontos do progresso
+    if posicao_antiga and posicao_antiga in bonus_map:
+        bonus_podio = Decimal(str(bonus_map[posicao_antiga]))
         progresso.pontos += bonus_podio
         progresso.save(update_fields=['pontos'])
     
-    # Recalcula a posição APÓS o bônus
-    usuarios_com_pontos = User.objects.annotate(
-        total_pontos=Sum('progressoleitura__pontos')
-    ).filter(total_pontos__gt=0).order_by('-total_pontos')
+    # Ranking após bônus
+    posicao_ranking, _ = obter_ranking()
     
-    posicao_ranking = None
-    total_usuarios = usuarios_com_pontos.count()
-    
-    for idx, usuario in enumerate(usuarios_com_pontos, start=1):
-        if usuario.id == request.user.id:
-            posicao_ranking = idx
-            break
-    
-    # Calcula total de pontos APÓS o bônus
-    total_pontos = request.user.progressoleitura_set.aggregate(
-        Sum('pontos')
-    )['pontos__sum'] or Decimal('0.00')
-    
-    # Total de livros concluídos
-    livros_concluidos = request.user.progressoleitura_set.filter(
-        status='CONCLUIDO'
-    ).count()
-    
-    context = {
+    return render(request, 'leia_bem/celebracao.html', {
         'progresso': progresso,
         'livro': progresso.livro,
         'posicao_ranking': posicao_ranking,
         'total_usuarios': total_usuarios,
-        'total_pontos': total_pontos,
-        'livros_concluidos': livros_concluidos,
-        'entrou_no_podio': entrou_no_podio,
+        'total_pontos': request.user.progressoleitura_set.aggregate(Sum('pontos'))['pontos__sum'] or Decimal('0.00'),
+        'livros_concluidos': request.user.progressoleitura_set.filter(status='CONCLUIDO').count(),
+        'entrou_no_podio': bool(bonus_podio),
         'bonus_podio': bonus_podio,
-        'posicao_podio': posicao_podio,
-    }
-    
-    return render(request, 'leia_bem/celebracao.html', context)
+        'posicao_podio': posicao_antiga,
+    })
 
 
 def signup(request):
@@ -502,4 +408,191 @@ def signup(request):
     
     # Envia o formulário pro template
     return render(request, 'leia_bem/signup.html', {'form': form})
-    return render(request, 'leia_bem/perfil.html', context)
+
+
+# ==========================================
+# ÁREA DE GERENCIAMENTO (APENAS SUPERUSUÁRIOS)
+# ==========================================
+
+from django.contrib.admin.views.decorators import staff_member_required
+from .forms import LivroForm, EscritorForm, EditoraForm
+
+@staff_member_required
+def gerenciar_dashboard(request):
+    """Dashboard de gerenciamento para superusuários"""
+    from django.db.models import Count
+    
+    estatisticas = {
+        'total_livros': Livro.objects.count(),
+        'total_escritores': Escritor.objects.count(),
+        'total_editoras': Editora.objects.count(),
+        'total_usuarios': request.user.__class__.objects.count(),
+    }
+    
+    return render(request, 'leia_bem/gerenciar/dashboard.html', {'estatisticas': estatisticas})
+
+
+# ========== CRUD LIVROS ==========
+
+@staff_member_required
+def gerenciar_livros(request):
+    """Lista todos os livros para gerenciamento"""
+    livros = Livro.objects.select_related('escritor', 'editora').all()
+    return render(request, 'leia_bem/gerenciar/livros_lista.html', {'livros': livros})
+
+
+@staff_member_required
+def criar_livro(request):
+    """Cria um novo livro"""
+    if request.method == 'POST':
+        form = LivroForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Livro criado com sucesso!')
+            return redirect('gerenciar_livros')
+    else:
+        form = LivroForm()
+    
+    return render(request, 'leia_bem/gerenciar/livro_form.html', {'form': form, 'acao': 'Criar'})
+
+
+@staff_member_required
+def editar_livro(request, livro_id):
+    """Edita um livro existente"""
+    livro = get_object_or_404(Livro, pk=livro_id)
+    
+    if request.method == 'POST':
+        form = LivroForm(request.POST, request.FILES, instance=livro)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Livro atualizado com sucesso!')
+            return redirect('gerenciar_livros')
+    else:
+        form = LivroForm(instance=livro)
+    
+    return render(request, 'leia_bem/gerenciar/livro_form.html', {'form': form, 'acao': 'Editar', 'livro': livro})
+
+
+@staff_member_required
+def deletar_livro(request, livro_id):
+    """Deleta um livro"""
+    livro = get_object_or_404(Livro, pk=livro_id)
+    
+    if request.method == 'POST':
+        titulo = livro.titulo
+        livro.delete()
+        messages.success(request, f'Livro "{titulo}" deletado com sucesso!')
+        return redirect('gerenciar_livros')
+    
+    return render(request, 'leia_bem/gerenciar/livro_confirmar_delete.html', {'livro': livro})
+
+
+# ========== CRUD ESCRITORES ==========
+
+@staff_member_required
+def gerenciar_escritores(request):
+    """Lista todos os escritores para gerenciamento"""
+    escritores = Escritor.objects.annotate(total_livros=Count('livros')).all()
+    return render(request, 'leia_bem/gerenciar/escritores_lista.html', {'escritores': escritores})
+
+
+@staff_member_required
+def criar_escritor(request):
+    """Cria um novo escritor"""
+    if request.method == 'POST':
+        form = EscritorForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Escritor(a) criado(a) com sucesso!')
+            return redirect('gerenciar_escritores')
+    else:
+        form = EscritorForm()
+    
+    return render(request, 'leia_bem/gerenciar/escritor_form.html', {'form': form, 'acao': 'Criar'})
+
+
+@staff_member_required
+def editar_escritor(request, escritor_id):
+    """Edita um escritor existente"""
+    escritor = get_object_or_404(Escritor, pk=escritor_id)
+    
+    if request.method == 'POST':
+        form = EscritorForm(request.POST, request.FILES, instance=escritor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Escritor(a) atualizado(a) com sucesso!')
+            return redirect('gerenciar_escritores')
+    else:
+        form = EscritorForm(instance=escritor)
+    
+    return render(request, 'leia_bem/gerenciar/escritor_form.html', {'form': form, 'acao': 'Editar', 'escritor': escritor})
+
+
+@staff_member_required
+def deletar_escritor(request, escritor_id):
+    """Deleta um escritor"""
+    escritor = get_object_or_404(Escritor, pk=escritor_id)
+    
+    if request.method == 'POST':
+        nome = escritor.nome
+        escritor.delete()
+        messages.success(request, f'Escritor(a) "{nome}" deletado(a) com sucesso!')
+        return redirect('gerenciar_escritores')
+    
+    return render(request, 'leia_bem/gerenciar/escritor_confirmar_delete.html', {'escritor': escritor})
+
+
+# ========== CRUD EDITORAS ==========
+
+@staff_member_required
+def gerenciar_editoras(request):
+    """Lista todas as editoras para gerenciamento"""
+    editoras = Editora.objects.all()
+    return render(request, 'leia_bem/gerenciar/editoras_lista.html', {'editoras': editoras})
+
+
+@staff_member_required
+def criar_editora(request):
+    """Cria uma nova editora"""
+    if request.method == 'POST':
+        form = EditoraForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Editora criada com sucesso!')
+            return redirect('gerenciar_editoras')
+    else:
+        form = EditoraForm()
+    
+    return render(request, 'leia_bem/gerenciar/editora_form.html', {'form': form, 'acao': 'Criar'})
+
+
+@staff_member_required
+def editar_editora(request, editora_id):
+    """Edita uma editora existente"""
+    editora = get_object_or_404(Editora, pk=editora_id)
+    
+    if request.method == 'POST':
+        form = EditoraForm(request.POST, instance=editora)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Editora atualizada com sucesso!')
+            return redirect('gerenciar_editoras')
+    else:
+        form = EditoraForm(instance=editora)
+    
+    return render(request, 'leia_bem/gerenciar/editora_form.html', {'form': form, 'acao': 'Editar', 'editora': editora})
+
+
+@staff_member_required
+def deletar_editora(request, editora_id):
+    """Deleta uma editora"""
+    editora = get_object_or_404(Editora, pk=editora_id)
+    
+    if request.method == 'POST':
+        nome = editora.nome
+        editora.delete()
+        messages.success(request, f'Editora "{nome}" deletada com sucesso!')
+        return redirect('gerenciar_editoras')
+    
+    return render(request, 'leia_bem/gerenciar/editora_confirmar_delete.html', {'editora': editora})
+

@@ -114,6 +114,15 @@
                 <!-- Links do lado direito da navbar -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
+                        <!-- Link de gerenciamento para superusuários -->
+                        {% if user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" href="{% url 'gerenciar_dashboard' %}">
+                                    <i class="fas fa-tools"></i> Gerenciar
+                                </a>
+                            </li>
+                        {% endif %}
+                        
                         <!-- Se o usuário está logado, mostra o perfil dele -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">

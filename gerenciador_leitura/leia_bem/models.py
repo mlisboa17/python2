@@ -69,6 +69,31 @@ JANJETAS_PODIO_TERCEIRO = 50.00  # Bônus 3º lugar
 JANJETAS_PODIO_SEGUNDO = 100.00  # Bônus 2º lugar
 JANJETAS_PODIO_PRIMEIRO = 300.00  # Bônus 1º lugar
 
+# Paródias motivacionais
+PARODIAS_MOTIVACIONAIS = [
+    "🚫 Tipo a Janja bloqueando conta no X: Sua avaliação tá BLOQUEADA até terminar o livro!",
+    "⚖️ Alexandre de Moraes determinou: LEIA TUDO antes de avaliar! Decisão monocrática, sem recurso!",
+    "🔒 O careca do INSS aprovou: Seu benefício de avaliar só sai quando terminar de ler!",
+    "📱 Janja fez um tweet: Quem não lê até o fim não tem moral pra avaliar! #LeiaTudo",
+    "👨‍⚖️ DECISÃO JUDICIAL: Livro incompleto = Avaliação negada! Cumpra a sentença de leitura!",
+    "💼 INSS das avaliações: Documentação incompleta! Faltam as páginas finais do livro!",
+    "🔨 Moraes bateu o martelo: Sem finale, sem estrelinhas! Tá na Constituição... do site!",
+    "🗣️ A Janja falou no Twitter: Vocês têm que ler tudo primeiro pra depois avaliar, viu gente!",
+    "📋 Careca do INSS: Seu processo de avaliação foi INDEFERIDO por falta de leitura completa!",
+    "⚡ Janja mandou bloquear: Avaliação censurada por falta de leitura completa do livro!",
+    "⚖️ STF votou 11x0: Sem Lei da Anistia pra quem não termina de ler! Todos os ministros concordam!",
+    "🏛️ Barroso decretou: Diferente da Anistia, aqui NÃO tem perdão pra leitura incompleta!",
+    "👔 Gilmar Mendes liberou todo mundo... menos você que não terminou o livro! Sem anistia aqui!",
+    "📜 Lei da Anistia existe pra crimes políticos, mas pra avaliação sem leitura NÃO TEM PERDÃO!",
+    "⚖️ Pleno do STF decidiu: Leitura incompleta é IMPERDOÁVEL! Nem anistia, nem habeas corpus!",
+    "🚀 Elon Musk twittou: Even I can't help you unlock this review! Read the book first!",
+    "⚡ Alexandre de Moraes bloqueou o X E sua avaliação! Termine o livro pra liberar!",
+    "🌐 A briga acabou: Elon e Moraes concordam que você precisa LER TUDO antes de avaliar!",
+    "🔐 Moraes mandou derrubar o X... e sua avaliação também caiu! Leia até o fim!",
+    "💰 Elon pagou a multa pro X voltar, mas sua avaliação SÓ volta quando terminar o livro!",
+    "⚖️ Moraes vs Musk: Único acordo que fizeram foi BLOQUEAR sua avaliação até ler tudo!"
+]
+
 class Livro(models.Model):
     titulo = models.CharField(max_length=300)
     editora = models.ForeignKey("Editora", on_delete=models.SET_NULL, null=True, blank=True)
