@@ -70,7 +70,7 @@ urlpatterns = [
     
     
     # ==========================================
-    # GERENCIAMENTO - Apenas para superusuários (staff)
+    # GERENCIAMENTO - Apenas para superusuários
     # ==========================================
     
     # Dashboard de gerenciamento

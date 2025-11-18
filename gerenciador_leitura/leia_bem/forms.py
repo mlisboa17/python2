@@ -1,11 +1,6 @@
 """
 Arquivo de FORMULÁRIOS
-Aqui a gente cria os formulários que aparecem no site.
-
-Um formulário é tipo uma ficha que o usuário preenche - 
-exemplo: formulário de cadastro, de login, de avaliação, etc.
-
-O Django já tem formulários prontos, mas a gente personaliza eles aqui!
+VAMOS UTILIZAR formularios prontos do django e personaliza los
 """
 
 from django import forms
@@ -24,13 +19,13 @@ class SignUpForm(UserCreationForm):
     e adiciona mais campos: email e nome_completo
     """
     
-    # Campo de email - OBRIGATÓRIO e tem que ser único
+    # Campo de email - OBRIGATÓRIO e Unico
     email = forms.EmailField(
-        required=True,  # Tem que preencher, não pode deixar vazio
-        label="Email",  # O texto que aparece em cima do campo
+        required=True,  #  não pode deixar vazio
+        label="Email",  # O texto que aparece no campo
         widget=forms.EmailInput(attrs={
-            'class': 'form-control form-control-lg',  # Classes do Bootstrap pra ficar bonito
-            'placeholder': 'seu@email.com',  # Texto de exemplo dentro do campo
+            'class': 'form-control form-control-lg',  # Classes do framework Bootstrap pra ficar bonito
+            'placeholder': 'seu@email.com',  
         })
     )
     
@@ -49,24 +44,24 @@ class SignUpForm(UserCreationForm):
         # Qual modelo (tabela do banco de dados) esse formulário usa?
         model = User
         
-        # Quais campos aparecem no formulário e em qual ordem?
+        # ordem dos campos do formulario
         fields = ('username', 'email', 'nome_completo', 'password1', 'password2')
         
-        # Personalizando os widgets (a aparência dos campos)
+        # Personalizando a aparência dos campos
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
-                'placeholder': 'escolha_um_username',
+                'placeholder': 'adicione um username',
             }),
         }
     
     def __init__(self, *args, **kwargs):
         """
-        Função que roda quando o formulário é criado.
-        Aqui a gente adiciona as classes do Bootstrap nos campos de senha
+        QUando o formulário é criado.
+        adicionando as classes do framework Bootstrap nos campos de senha
         (que vêm do UserCreationForm)
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs) 
         
         # Adiciona classes Bootstrap nos campos de senha
         self.fields['password1'].widget.attrs.update({
@@ -79,36 +74,31 @@ class SignUpForm(UserCreationForm):
         })
     
     def clean_email(self):
-        """
-        Função de validação do email.
-        Verifica se já existe alguém usando esse email.
+       # validação do email.
         
-        É tipo um "fiscal" que checa se tá tudo certo antes de salvar!
-        """
+        
         email = self.cleaned_data.get('email')
         
-        # Verifica se já tem alguém cadastrado com esse email
+        # Verifica se já texiste esse email
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(
-                'Esse email já está sendo usado! Escolha outro ou faça login.'
+                'Esse email já está em Uso! Faça seu login ou use outro email.'
             )
         
         return email
     
     def save(self, commit=True):
-        """
-        Função que salva o usuário no banco de dados.
         
-        commit=True significa "salva de verdade no banco agora"
-        commit=False significa "só prepara, mas não salva ainda"
-        """
-        # Cria o usuário mas ainda não salva
+        # Função que salva o usuário no banco de dados.
+        
+        
+        # Cria o usuário(INSTANCIA) mas ainda não salva NO base de dados
         user = super().save(commit=False)
         
-        # Adiciona o email que o usuário digitou
+        # Adiciona o email
         user.email = self.cleaned_data['email']
         
-        # Adiciona o nome completo (se ele preencheu)
+        # Adiciona o nome completo,caso ele tenha preenchido    
         if self.cleaned_data.get('nome_completo'):
             user.nome_completo = self.cleaned_data['nome_completo']
         
