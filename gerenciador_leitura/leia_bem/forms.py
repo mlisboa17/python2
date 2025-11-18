@@ -13,13 +13,13 @@ User = get_user_model()
 
 class SignUpForm(UserCreationForm):
     """
-    Formulário de Cadastro (Sign Up)
+    Formulário de Cadastro (Sign Up) -> bootstrap
     
     *** HERANÇA ***
-    Herda de UserCreationForm (CLASSE DO DJANGO - não do Bootstrap!)
+    Herda de UserCreationForm (CLASSE DO DJANGO -não do Bootstrap!)
     UserCreationForm já vem pronto com campos: username, password1, password2
     
-    Aqui adicionamos mais campos: email e nome_completo
+    Aqui adicionamos mais campos: email e nome_completo da minha classe Usuario personalizada
     """
     
     # Campo de email - OBRIGATÓRIO e Unico
@@ -192,7 +192,7 @@ class EditoraForm(forms.ModelForm):
         # *** BOOTSTRAP APLICADO AQUI (nos widgets) ***
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da editora'}),  # CSS Bootstrap
-            'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.editora.com.br'}),  # CSS Bootstrap
+            'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'http://www.editora.com.br'}),  # CSS Bootstrap
             'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 98765-4321'}),  # CSS Bootstrap
         }
         labels = {

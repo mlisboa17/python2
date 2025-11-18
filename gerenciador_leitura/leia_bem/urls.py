@@ -20,24 +20,18 @@ urlpatterns = [
     path('livros/<int:livro_id>/', views.detalhe_livro, name='detalhe_livro'),
     
     
-    # ==========================================
-    # ÁREA DO USUÁRIO - Apenas usuários logados podem acessar
-    # ==========================================
+    # A´rea do usuario Apenas usuários logados podem acessar
     
     # Minha biblioteca pessoal - mostra todos os livros que estou lendo
     path('meus-livros/', views.meus_livros, name='meus_livros'),
     
-    # Adicionar um livro à minha lista de leitura
-    # Exemplo: livros/3/adicionar/ adiciona o livro com ID 3 na minha lista
+    # Adicionar um livro a minha biblioteca
     path('livros/<int:livro_id>/adicionar/', views.adicionar_livro_leitura, name='adicionar_livro_leitura'),
 
     
-    # ==========================================
-    # PROGRESSO DE LEITURA - Acompanhar o quanto já li
-    # ==========================================
+   
     
-    # Atualizar quantas páginas já li e o status do livro (lendo, pausado, concluído)
-    # Exemplo: progresso/7/atualizar/ atualiza meu progresso no livro 7
+    # Atualizar quantas páginas foram lidas 
     path('progresso/<int:progresso_id>/atualizar/', views.atualizar_progresso, name='atualizar_progresso'),
     
     # Registrar que fiz uma sessão de leitura hoje - ganha pontos!
