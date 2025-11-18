@@ -291,7 +291,7 @@ def ranking_pontos(request):
 
 @login_required
 def perfil_usuario(request):
-    """Perfil do usuário com estatísticas"""
+    """Perfil com estatísticas, gráfico Chart.js e progressos recentes"""
     from django.db.models import Sum, Avg
     
     progressos = ProgressoLeitura.objects.filter(usuario=request.user)

@@ -101,12 +101,7 @@
     </div>
 </div>
 
-<!-- 
-    =============================================
-    GRÁFICO DE PROGRESSO
-    Visualização bonita das suas estatísticas
-    =============================================
--->
+<!-- Gráfico Chart.js: Verde=Concluídos, Azul=Lendo, Cinza=Não iniciados -->
 <div class="card shadow-sm mb-4" data-aos="fade-up">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">
@@ -276,15 +271,15 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Chart.js - Biblioteca para gráficos bonitos -->
+<!-- Chart.js - Biblioteca para gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Cria o gráfico de pizza com as estatísticas
+    // Cria gráfico de rosca com as estatísticas
     const ctx = document.getElementById('graficoProgresso').getContext('2d');
     
     new Chart(ctx, {
-        type: 'doughnut', // Gráfico de rosca (donut)
+        type: 'doughnut',
         data: {
             labels: ['Concluídos', 'Lendo', 'Não Iniciados'],
             datasets: [{
