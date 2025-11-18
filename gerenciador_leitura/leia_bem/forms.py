@@ -15,8 +15,11 @@ class SignUpForm(UserCreationForm):
     """
     Formulário de Cadastro (Sign Up)
     
-    Herda do UserCreationForm do Django (que já vem pronto com username e senha)
-    e adiciona mais campos: email e nome_completo
+    *** HERANÇA ***
+    Herda de UserCreationForm (CLASSE DO DJANGO - não do Bootstrap!)
+    UserCreationForm já vem pronto com campos: username, password1, password2
+    
+    Aqui adicionamos mais campos: email e nome_completo
     """
     
     # Campo de email - OBRIGATÓRIO e Unico
@@ -24,7 +27,10 @@ class SignUpForm(UserCreationForm):
         required=True,  #  não pode deixar vazio
         label="Email",  # O texto que aparece no campo
         widget=forms.EmailInput(attrs={
-            'class': 'form-control form-control-lg',  # Classes do framework Bootstrap pra ficar bonito
+            # *** BOOTSTRAP APLICADO AQUI ***
+            # 'class' = classes CSS do Bootstrap para deixar o campo bonito
+            # Bootstrap é CSS (aparência), NÃO é herança Python!
+            'class': 'form-control form-control-lg',  # Classes do framework Bootstrap
             'placeholder': 'seu@email.com',  
         })
     )
@@ -35,7 +41,8 @@ class SignUpForm(UserCreationForm):
         max_length=200,  # Máximo 200 caracteres
         label="Nome Completo",
         widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
+            # *** BOOTSTRAP APLICADO AQUI ***
+            'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
             'placeholder': 'João da Silva',
         })
     )
@@ -50,26 +57,28 @@ class SignUpForm(UserCreationForm):
         # Personalizando a aparência dos campos
         widgets = {
             'username': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
+                # *** BOOTSTRAP APLICADO AQUI ***
+                'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
                 'placeholder': 'adicione um username',
             }),
         }
     
     def __init__(self, *args, **kwargs):
         """
-        QUando o formulário é criado.
-        adicionando as classes do framework Bootstrap nos campos de senha
-        (que vêm do UserCreationForm)
+        Método construtor - executado quando o formulário é criado.
+        Aqui adicionamos as classes Bootstrap nos campos de senha
+        (password1 e password2 vêm da HERANÇA do UserCreationForm)
         """
-        super().__init__(*args, **kwargs) 
+        super().__init__(*args, **kwargs)  # Chama o construtor da classe pai (UserCreationForm)
         
-        # Adiciona classes Bootstrap nos campos de senha
+        # *** BOOTSTRAP APLICADO AQUI ***
+        # Adiciona classes CSS Bootstrap nos campos de senha
         self.fields['password1'].widget.attrs.update({
-            'class': 'form-control form-control-lg',
+            'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
             'placeholder': '********',
         })
         self.fields['password2'].widget.attrs.update({
-            'class': 'form-control form-control-lg',
+            'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
             'placeholder': '********',
         })
     
@@ -112,14 +121,21 @@ class SignUpForm(UserCreationForm):
 from .models import Livro, Escritor, Editora
 
 class LivroForm(forms.ModelForm):
-    """Formulário para criar/editar livros"""
+    """
+    Formulário para criar/editar livros
+    
+    *** HERANÇA ***
+    Herda de ModelForm (CLASSE DO DJANGO)
+    ModelForm cria automaticamente campos baseados no modelo Livro
+    """
     class Meta:
         model = Livro
         fields = ['titulo', 'escritor', 'editora', 'ano_publicacao', 'numero_paginas', 'sinopse', 'isbn', 'capa']
+        # *** BOOTSTRAP APLICADO AQUI (nos widgets) ***
         widgets = {
-            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título do livro'}),
-            'escritor': forms.Select(attrs={'class': 'form-select'}),
-            'editora': forms.Select(attrs={'class': 'form-select'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título do livro'}),  # CSS Bootstrap
+            'escritor': forms.Select(attrs={'class': 'form-select'}),  # CSS Bootstrap
+            'editora': forms.Select(attrs={'class': 'form-select'}),  # CSS Bootstrap
             'ano_publicacao': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '2024'}),
             'numero_paginas': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '300'}),
             'sinopse': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Sinopse do livro...'}),
@@ -139,13 +155,19 @@ class LivroForm(forms.ModelForm):
 
 
 class EscritorForm(forms.ModelForm):
-    """Formulário para criar/editar escritores"""
+    """
+    Formulário para criar/editar escritores
+    
+    *** HERANÇA ***
+    Herda de ModelForm (CLASSE DO DJANGO)
+    """
     class Meta:
         model = Escritor
         fields = ['nome', 'email', 'bibliografia', 'foto']
+        # *** BOOTSTRAP APLICADO AQUI (nos widgets) ***
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome completo'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@escritor.com'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome completo'}),  # CSS Bootstrap
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@escritor.com'}),  # CSS Bootstrap
             'bibliografia': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Biografia do escritor...'}),
             'foto': forms.FileInput(attrs={'class': 'form-control'}),
         }
@@ -158,14 +180,20 @@ class EscritorForm(forms.ModelForm):
 
 
 class EditoraForm(forms.ModelForm):
-    """Formulário para criar/editar editoras"""
+    """
+    Formulário para criar/editar editoras
+    
+    *** HERANÇA ***
+    Herda de ModelForm (CLASSE DO DJANGO)
+    """
     class Meta:
         model = Editora
         fields = ['nome', 'site', 'telefone']
+        # *** BOOTSTRAP APLICADO AQUI (nos widgets) ***
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da editora'}),
-            'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.editora.com.br'}),
-            'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 98765-4321'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da editora'}),  # CSS Bootstrap
+            'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.editora.com.br'}),  # CSS Bootstrap
+            'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 98765-4321'}),  # CSS Bootstrap
         }
         labels = {
             'nome': 'Nome',

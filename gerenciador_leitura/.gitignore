@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media
+/static
+
+# Ambientes virtuais
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentação (se não quiser versionar)
+documentacao/
+
+# OS
+.DS_Store
+Thumbs.db
