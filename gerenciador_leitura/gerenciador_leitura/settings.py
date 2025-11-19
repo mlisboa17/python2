@@ -143,4 +143,4 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Onde fica a página de login (caso o usuário tente acessar uma página que precisa estar logado)
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/login/'

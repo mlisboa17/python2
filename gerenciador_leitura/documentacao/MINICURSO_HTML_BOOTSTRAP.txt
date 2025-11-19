@@ -1,0 +1,1381 @@
+================================================================================
+                    MINICURSO COMPLETO DE HTML + BOOTSTRAP
+                    Baseado no Projeto "Leia Bem"
+================================================================================
+
+================================================================================
+MÓDULO 1: FUNDAMENTOS DE HTML
+================================================================================
+
+1.1 O QUE É HTML?
+-----------------
+HTML = HyperText Markup Language (Linguagem de Marcação de Hipertexto)
+
+NÃO é linguagem de programação! É linguagem de MARCAÇÃO.
+Ela ESTRUTURA o conteúdo da página (títulos, textos, imagens, links, etc)
+
+ANALOGIA: HTML é como o esqueleto da página web
+- HTML = Estrutura (ossos)
+- CSS = Aparência (pele, roupas)
+- JavaScript = Comportamento (músculos, movimentos)
+
+1.2 ESTRUTURA BÁSICA DE UM HTML
+--------------------------------
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Título da Página</title>
+</head>
+<body>
+    <!-- Conteúdo visível aqui -->
+</body>
+</html>
+```
+
+EXPLICAÇÃO LINHA POR LINHA:
+
+<!DOCTYPE html>
+    → Declara que é HTML5 (versão mais atual)
+    → Sempre a primeira linha
+
+<html lang="pt-BR">
+    → Tag raiz (engloba tudo)
+    → lang="pt-BR" = idioma português do Brasil
+    → Ajuda leitores de tela e Google
+
+<head>
+    → Cabeçalho (informações SOBRE a página)
+    → NÃO aparece na tela, só configurações
+    
+<meta charset="UTF-8">
+    → Define codificação de caracteres
+    → UTF-8 = aceita acentos (á, é, ç, etc)
+    
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    → Torna o site RESPONSIVO
+    → width=device-width = largura da tela do dispositivo
+    → initial-scale=1.0 = zoom inicial 100%
+    → SEM ISSO, site fica minúsculo no celular!
+    
+<title>Título da Página</title>
+    → Texto que aparece na aba do navegador
+    → Importante pra SEO (Google)
+    
+<body>
+    → Corpo (conteúdo visível da página)
+    → Tudo que o usuário VÊ fica aqui
+
+<!-- Comentário -->
+    → Comentários não aparecem na página
+    → Servem pra explicar o código
+
+
+1.3 TAGS HTML ESSENCIAIS
+-------------------------
+
+A) TÍTULOS (Headings)
+```html
+<h1>Título Principal</h1>        <!-- O maior e mais importante -->
+<h2>Subtítulo</h2>                <!-- Segundo nível -->
+<h3>Sub-subtítulo</h3>            <!-- Terceiro nível -->
+<h4>...</h4>                      <!-- e assim por diante... -->
+<h5>...</h5>
+<h6>Título Menor</h6>
+```
+REGRAS:
+- Só UM <h1> por página (título principal)
+- Use hierarquia: h1 → h2 → h3 (não pule níveis)
+- Google usa pra entender a estrutura da página
+
+B) PARÁGRAFOS E TEXTOS
+```html
+<p>Parágrafo de texto normal</p>
+<br>  <!-- Quebra de linha (não tem fechamento!) -->
+<hr>  <!-- Linha horizontal (separador) -->
+
+<strong>Texto importante (negrito)</strong>
+<em>Texto enfatizado (itálico)</em>
+<small>Texto pequeno</small>
+```
+
+C) LINKS
+```html
+<a href="https://google.com">Clique aqui</a>
+    <!-- href = endereço (HyperReference) -->
+
+<a href="https://google.com" target="_blank">Abre em nova aba</a>
+    <!-- target="_blank" = abre em nova guia -->
+
+<a href="/livros/">Link interno</a>
+    <!-- Sem http:// = link dentro do próprio site -->
+```
+
+D) IMAGENS
+```html
+<img src="caminho/imagem.jpg" alt="Descrição da imagem">
+    <!-- src = source (origem da imagem) -->
+    <!-- alt = texto alternativo (acessibilidade + SEO) -->
+
+<img src="capa.jpg" alt="Capa do livro Python" style="width: 200px;">
+    <!-- style = adiciona estilos inline -->
+```
+
+E) LISTAS
+```html
+<!-- Lista não-ordenada (bullets •) -->
+<ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+</ul>
+
+<!-- Lista ordenada (números 1, 2, 3...) -->
+<ol>
+    <li>Primeiro</li>
+    <li>Segundo</li>
+    <li>Terceiro</li>
+</ol>
+```
+
+F) DIVS E SPANS
+```html
+<div>
+    <!-- Container de BLOCO (ocupa linha inteira) -->
+    <p>Conteúdo aqui</p>
+</div>
+
+<span>Texto inline</span>
+    <!-- Container INLINE (não quebra linha) -->
+```
+
+DIFERENÇA:
+<div> = caixa de bloco (quebra linha)
+<span> = pedaço de texto inline (não quebra linha)
+
+G) FORMULÁRIOS
+```html
+<form method="post" action="/processar/">
+    <input type="text" name="nome" placeholder="Digite seu nome">
+    <input type="email" name="email" placeholder="seu@email.com">
+    <input type="password" name="senha" placeholder="Senha">
+    <textarea name="comentario" rows="5"></textarea>
+    <button type="submit">Enviar</button>
+</form>
+```
+TIPOS DE INPUT:
+- text = texto normal
+- email = valida email
+- password = esconde caracteres
+- number = só números
+- date = seletor de data
+- file = upload de arquivo
+- checkbox = caixa de seleção
+- radio = opção única
+
+H) TABELAS
+```html
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>João</td>
+            <td>25</td>
+        </tr>
+        <tr>
+            <td>Maria</td>
+            <td>30</td>
+        </tr>
+    </tbody>
+</table>
+```
+ESTRUTURA:
+- <table> = tabela completa
+- <thead> = cabeçalho
+- <tbody> = corpo
+- <tr> = linha (table row)
+- <th> = célula de cabeçalho (negrito)
+- <td> = célula de dados
+
+
+1.4 TAGS SEMÂNTICAS (HTML5)
+----------------------------
+Tags com SIGNIFICADO (melhor que <div>):
+
+```html
+<header>
+    <!-- Cabeçalho da página -->
+    <nav>
+        <!-- Barra de navegação -->
+    </nav>
+</header>
+
+<main>
+    <!-- Conteúdo principal -->
+    <section>
+        <!-- Seção da página -->
+        <article>
+            <!-- Artigo/conteúdo independente -->
+        </article>
+    </section>
+    
+    <aside>
+        <!-- Barra lateral -->
+    </aside>
+</main>
+
+<footer>
+    <!-- Rodapé -->
+</footer>
+```
+
+VANTAGENS:
+✅ Melhor SEO (Google entende melhor)
+✅ Acessibilidade (leitores de tela)
+✅ Código mais legível
+
+
+================================================================================
+MÓDULO 2: BOOTSTRAP - FRAMEWORK CSS
+================================================================================
+
+2.1 O QUE É BOOTSTRAP?
+----------------------
+Bootstrap é um FRAMEWORK CSS criado pelo Twitter.
+Framework = conjunto de ferramentas prontas
+
+O QUE ELE FAZ:
+✅ Componentes prontos (botões, cards, navbar, modals)
+✅ Sistema de grid responsivo (automaticamente se adapta ao celular)
+✅ Classes CSS utilitárias (margens, cores, alinhamento)
+✅ JavaScript para interações (dropdowns, modals, carousel)
+
+ANALOGIA: Bootstrap é como um "kit de Lego" para web design
+- Você monta a página usando peças prontas
+- Não precisa criar tudo do zero
+- Resultado profissional sem ser designer
+
+2.2 INSTALAÇÃO
+--------------
+OPÇÃO 1: CDN (Content Delivery Network) - USADO NO PROJETO
+```html
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Seu conteúdo aqui -->
+    
+    <!-- Bootstrap JavaScript (vai no final!) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+```
+
+VANTAGENS DO CDN:
+✅ Não precisa baixar nada
+✅ Carrega rápido (cache global)
+✅ Sempre atualizado
+
+OPÇÃO 2: Download
+- Baixar arquivos do getbootstrap.com
+- Colocar na pasta static/
+- Referenciar localmente
+
+
+2.3 SISTEMA DE GRID (RESPONSIVIDADE)
+-------------------------------------
+Bootstrap divide a tela em 12 COLUNAS
+
+CONCEITOS:
+- container = centraliza conteúdo
+- row = linha (linha horizontal)
+- col = coluna (divide a linha)
+
+```html
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <!-- Ocupa 6 colunas (metade da tela) -->
+        </div>
+        <div class="col-6">
+            <!-- Ocupa 6 colunas (outra metade) -->
+        </div>
+    </div>
+</div>
+```
+
+BREAKPOINTS (tamanhos de tela):
+col-      → Todas as telas (celular, tablet, desktop)
+col-sm-   → ≥ 576px (celular horizontal)
+col-md-   → ≥ 768px (tablet)
+col-lg-   → ≥ 992px (desktop)
+col-xl-   → ≥ 1200px (desktop grande)
+col-xxl-  → ≥ 1400px (desktop muito grande)
+
+EXEMPLO RESPONSIVO:
+```html
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-4">
+        <!-- Celular: 100% (12/12)
+             Tablet: 50% (6/12)
+             Desktop: 33% (4/12) -->
+    </div>
+</div>
+```
+
+EXEMPLO DO PROJETO (index.html):
+```html
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+    <!-- 
+        row-cols-1 = 1 coluna no celular
+        row-cols-md-3 = 3 colunas no tablet
+        row-cols-lg-6 = 6 colunas no desktop
+        g-4 = gap (espaçamento) de tamanho 4
+    -->
+    {% for livro in livros %}
+        <div class="col">
+            <!-- Card do livro -->
+        </div>
+    {% endfor %}
+</div>
+```
+
+RESULTADO:
+- 📱 Celular: 1 livro por linha (100% largura)
+- 📱 Tablet: 3 livros por linha (33% cada)
+- 💻 Desktop: 6 livros por linha (16% cada)
+
+
+2.4 COMPONENTES BOOTSTRAP
+--------------------------
+
+A) NAVBAR (Barra de Navegação)
+```html
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- 
+        navbar = componente navbar
+        navbar-expand-lg = responsivo (vira hambúrguer em telas pequenas)
+        navbar-dark = texto branco
+        bg-primary = fundo azul
+    -->
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-book"></i> Leia Bem
+        </a>
+        
+        <!-- Botão hambúrguer (aparece no celular) -->
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Menu que colapsa no celular -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/livros/">Livros</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+```
+
+EXEMPLO DO PROJETO (base.html):
+```html
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">
+            <i class="fas fa-book-reader"></i> Leia Bem 
+            <small class="text-white-50">| Aqui o povo lê... e recebe!</small>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'lista_livros' %}">
+                        <i class="fas fa-book"></i> Livros
+                    </a>
+                </li>
+                
+                {% if user.is_authenticated %}
+                    <!-- Links só pra quem está logado -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'meus_livros' %}">
+                            <i class="fas fa-bookmark"></i> Meus Livros
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+            
+            <!-- Menu alinhado à direita -->
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Sair</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+```
+
+O QUE ACONTECE:
+- 💻 Desktop: menu horizontal completo
+- 📱 Celular: botão hambúrguer (☰), menu colapsa
+
+
+B) CARDS (Cartões)
+```html
+<div class="card">
+    <img src="imagem.jpg" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">Título</h5>
+        <p class="card-text">Texto do card</p>
+        <a href="#" class="btn btn-primary">Botão</a>
+    </div>
+</div>
+```
+
+EXEMPLO DO PROJETO (index.html - Card de Livro):
+```html
+<div class="card card-livro h-100 shadow-sm">
+    <!-- 
+        card = componente card
+        card-livro = classe customizada (CSS próprio)
+        h-100 = height 100% (todos os cards mesma altura)
+        shadow-sm = sombra pequena
+    -->
+    
+    {% if livro.capa %}
+        <img src="{{ livro.capa.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}" 
+             style="height: 250px; object-fit: cover;">
+        <!-- 
+            card-img-top = imagem no topo do card
+            height: 250px = altura fixa
+            object-fit: cover = imagem cobre área sem distorcer
+        -->
+    {% else %}
+        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+             style="height: 250px;">
+            <i class="fas fa-book fa-3x"></i>
+        </div>
+        <!-- 
+            bg-secondary = fundo cinza
+            text-white = texto branco
+            d-flex = display flex
+            align-items-center = centraliza vertical
+            justify-content-center = centraliza horizontal
+            fa-3x = ícone 3x maior
+        -->
+    {% endif %}
+
+    <div class="card-body">
+        <h6 class="card-title mb-2" style="height: 3em; overflow: hidden;">
+            {{ livro.titulo }}
+        </h6>
+        <!-- 
+            mb-2 = margin-bottom tamanho 2
+            height: 3em = altura fixa (limita título grande)
+            overflow: hidden = esconde excesso
+        -->
+        
+        {% if livro.escritor %}
+            <p class="card-text small text-muted mb-2">
+                <!-- 
+                    small = texto menor
+                    text-muted = cor cinza clara
+                -->
+                <i class="fas fa-pen"></i> {{ livro.escritor.nome }}
+            </p>
+        {% endif %}
+
+        <!-- Estrelas de avaliação -->
+        <div class="mb-2">
+            {% if livro.total_avaliacoes > 0 %}
+                <span class="estrelas">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= livro.nota_media %}
+                            <i class="fas fa-star"></i>  <!-- Estrela cheia -->
+                        {% else %}
+                            <i class="far fa-star"></i>  <!-- Estrela vazia -->
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <small class="text-muted">
+                    ({{ livro.total_avaliacoes }})
+                </small>
+            {% else %}
+                <small class="text-muted">
+                    Sem avaliações ainda
+                </small>
+            {% endif %}
+        </div>
+
+        <!-- Botões -->
+        <a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-sm btn-outline-primary w-100">
+            <!-- 
+                btn = botão Bootstrap
+                btn-sm = botão pequeno
+                btn-outline-primary = botão com borda azul
+                w-100 = width 100%
+            -->
+            <i class="fas fa-info-circle"></i> Ver Detalhes
+        </a>
+    </div>
+</div>
+```
+
+C) BOTÕES
+```html
+<!-- Cores -->
+<button class="btn btn-primary">Primário (azul)</button>
+<button class="btn btn-secondary">Secundário (cinza)</button>
+<button class="btn btn-success">Sucesso (verde)</button>
+<button class="btn btn-danger">Perigo (vermelho)</button>
+<button class="btn btn-warning">Aviso (amarelo)</button>
+<button class="btn btn-info">Info (azul claro)</button>
+<button class="btn btn-light">Claro</button>
+<button class="btn btn-dark">Escuro</button>
+
+<!-- Outline (só borda) -->
+<button class="btn btn-outline-primary">Outline</button>
+
+<!-- Tamanhos -->
+<button class="btn btn-lg btn-primary">Grande</button>
+<button class="btn btn-primary">Normal</button>
+<button class="btn btn-sm btn-primary">Pequeno</button>
+
+<!-- Largura total -->
+<button class="btn btn-primary w-100">Botão largura total</button>
+
+<!-- Desabilitado -->
+<button class="btn btn-primary" disabled>Desabilitado</button>
+```
+
+D) ALERTAS (Mensagens)
+```html
+<div class="alert alert-success">
+    <i class="fas fa-check-circle"></i> Operação realizada com sucesso!
+</div>
+
+<div class="alert alert-danger">
+    <i class="fas fa-times-circle"></i> Erro ao processar!
+</div>
+
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle"></i> Atenção!
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> Informação importante.
+</div>
+
+<!-- Com botão pra fechar -->
+<div class="alert alert-success alert-dismissible fade show">
+    Mensagem aqui
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+```
+
+EXEMPLO DO PROJETO (base.html - Mensagens Django):
+```html
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+```
+
+E) FORMULÁRIOS
+```html
+<form method="post">
+    <div class="mb-3">
+        <!-- 
+            mb-3 = margin-bottom tamanho 3
+            (cria espaçamento entre campos)
+        -->
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" placeholder="Digite seu nome">
+        <!-- 
+            form-control = estilo Bootstrap pra inputs
+            (borda arredondada, padding, foco azul)
+        -->
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" placeholder="seu@email.com">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mensagem</label>
+        <textarea class="form-control" rows="4"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select class="form-select">
+            <option>Selecione...</option>
+            <option>SP</option>
+            <option>RJ</option>
+        </select>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="aceito">
+        <label class="form-check-label" for="aceito">
+            Aceito os termos
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</form>
+```
+
+F) TABELAS
+```html
+<table class="table">
+    <!-- 
+        table = tabela Bootstrap básica
+    -->
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>João</td>
+            <td>joao@email.com</td>
+            <td>
+                <button class="btn btn-sm btn-primary">Editar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Variações -->
+<table class="table table-striped">     <!-- Linhas zebradas -->
+<table class="table table-hover">       <!-- Hover nas linhas -->
+<table class="table table-bordered">    <!-- Com bordas -->
+<table class="table table-sm">          <!-- Compacta -->
+```
+
+EXEMPLO DO PROJETO (ranking.html):
+```html
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Posição</th>
+            <th>Usuário</th>
+            <th><i class="fas fa-coins"></i> Janjetas</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in ranking %}
+            <tr {% if usuario == user %}class="table-primary"{% endif %}>
+                <!-- 
+                    Destaca linha do usuário logado com fundo azul
+                    table-primary = cor de fundo azul claro
+                -->
+                <td>
+                    {% if forloop.counter == 1 %}
+                        <i class="fas fa-trophy text-warning"></i> 1º
+                    {% elif forloop.counter == 2 %}
+                        <i class="fas fa-medal text-secondary"></i> 2º
+                    {% elif forloop.counter == 3 %}
+                        <i class="fas fa-medal" style="color: #cd7f32;"></i> 3º
+                    {% else %}
+                        {{ forloop.counter }}º
+                    {% endif %}
+                </td>
+                <td>{{ usuario.username }}</td>
+                <td>{{ usuario.total_pontos|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+```
+
+G) MODAIS (Pop-ups)
+```html
+<!-- Botão que abre o modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#meuModal">
+    Abrir Modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="meuModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Título do Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Conteúdo do modal aqui</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+H) BADGES (Etiquetas)
+```html
+<span class="badge bg-primary">Novo</span>
+<span class="badge bg-success">Concluído</span>
+<span class="badge bg-danger">Urgente</span>
+<span class="badge bg-warning text-dark">Atenção</span>
+
+<!-- Pill (arredondado) -->
+<span class="badge rounded-pill bg-primary">5</span>
+```
+
+EXEMPLO DO PROJETO (meus_livros.html):
+```html
+{% if progresso.status == "LENDO" %}
+    <span class="badge bg-primary">Lendo</span>
+{% elif progresso.status == "CONCLUIDO" %}
+    <span class="badge bg-success">Concluído</span>
+{% elif progresso.status == "PAUSADO" %}
+    <span class="badge bg-warning text-dark">Pausado</span>
+{% endif %}
+```
+
+I) PROGRESS BAR (Barra de Progresso)
+```html
+<div class="progress">
+    <div class="progress-bar" style="width: 75%">75%</div>
+</div>
+
+<!-- Com cor -->
+<div class="progress">
+    <div class="progress-bar bg-success" style="width: 100%">Completo!</div>
+</div>
+
+<!-- Animada -->
+<div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+         style="width: 50%">
+    </div>
+</div>
+```
+
+EXEMPLO DO PROJETO (meus_livros.html):
+```html
+{% if progresso.livro.numero_paginas > 0 %}
+    {% widthratio progresso.pagina_atual progresso.livro.numero_paginas 100 as porcentagem %}
+    <div class="progress" style="height: 25px;">
+        <div class="progress-bar {% if porcentagem == 100 %}bg-success{% endif %}" 
+             style="width: {{ porcentagem }}%;">
+            {{ progresso.pagina_atual }} / {{ progresso.livro.numero_paginas }} 
+            ({{ porcentagem }}%)
+        </div>
+    </div>
+{% endif %}
+```
+
+
+2.5 CLASSES UTILITÁRIAS
+------------------------
+
+A) ESPAÇAMENTO (Margin e Padding)
+```html
+<!-- MARGIN (margem externa) -->
+m-0, m-1, m-2, m-3, m-4, m-5    → margin em todos os lados
+mt-3  → margin-top
+mb-3  → margin-bottom
+ms-3  → margin-start (esquerda)
+me-3  → margin-end (direita)
+mx-3  → margin horizontal (esquerda + direita)
+my-3  → margin vertical (cima + baixo)
+m-auto  → margin auto (centraliza)
+
+<!-- PADDING (preenchimento interno) -->
+p-0, p-1, p-2, p-3, p-4, p-5    → padding em todos os lados
+pt-3, pb-3, ps-3, pe-3, px-3, py-3  → mesma lógica do margin
+
+<!-- TAMANHOS -->
+0 = 0px
+1 = 0.25rem (4px)
+2 = 0.5rem (8px)
+3 = 1rem (16px)
+4 = 1.5rem (24px)
+5 = 3rem (48px)
+```
+
+EXEMPLO:
+```html
+<div class="mt-5 mb-3 px-4">
+    <!-- margin-top: 48px
+         margin-bottom: 16px
+         padding-left e right: 24px -->
+</div>
+```
+
+B) CORES
+```html
+<!-- Cores de texto -->
+<p class="text-primary">Azul</p>
+<p class="text-secondary">Cinza</p>
+<p class="text-success">Verde</p>
+<p class="text-danger">Vermelho</p>
+<p class="text-warning">Amarelo</p>
+<p class="text-info">Azul claro</p>
+<p class="text-muted">Cinza claro</p>
+<p class="text-white">Branco</p>
+<p class="text-dark">Escuro</p>
+
+<!-- Cores de fundo -->
+<div class="bg-primary text-white">Fundo azul</div>
+<div class="bg-light">Fundo claro</div>
+<div class="bg-dark text-white">Fundo escuro</div>
+```
+
+C) DISPLAY
+```html
+<div class="d-none">Escondido</div>
+<div class="d-block">Display block</div>
+<div class="d-inline">Display inline</div>
+<div class="d-flex">Display flex</div>
+<div class="d-grid">Display grid</div>
+
+<!-- Responsivo -->
+<div class="d-none d-md-block">
+    <!-- Escondido no celular, visível no tablet+ -->
+</div>
+```
+
+D) FLEXBOX
+```html
+<div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <!-- 
+        d-flex = display flex
+        justify-content-center = centraliza horizontal
+        align-items-center = centraliza vertical
+    -->
+    <p>Centralizado!</p>
+</div>
+
+<!-- Outras opções -->
+<div class="d-flex justify-content-start">    <!-- Esquerda -->
+<div class="d-flex justify-content-end">      <!-- Direita -->
+<div class="d-flex justify-content-between">  <!-- Espaçamento entre -->
+<div class="d-flex flex-column">              <!-- Direção coluna -->
+<div class="d-flex flex-wrap">                <!-- Quebra linha -->
+```
+
+E) ALINHAMENTO DE TEXTO
+```html
+<p class="text-start">Esquerda</p>
+<p class="text-center">Centro</p>
+<p class="text-end">Direita</p>
+```
+
+F) LARGURA E ALTURA
+```html
+<div class="w-25">Largura 25%</div>
+<div class="w-50">Largura 50%</div>
+<div class="w-75">Largura 75%</div>
+<div class="w-100">Largura 100%</div>
+
+<div class="h-25" style="height: 200px;">Altura 25%</div>
+```
+
+G) BORDAS
+```html
+<div class="border">Borda em todos os lados</div>
+<div class="border-top">Borda só no topo</div>
+<div class="border-primary">Borda azul</div>
+<div class="rounded">Bordas arredondadas</div>
+<div class="rounded-circle">Círculo</div>
+```
+
+H) SOMBRAS
+```html
+<div class="shadow-sm">Sombra pequena</div>
+<div class="shadow">Sombra média</div>
+<div class="shadow-lg">Sombra grande</div>
+```
+
+
+================================================================================
+MÓDULO 3: INTEGRANDO DJANGO COM BOOTSTRAP
+================================================================================
+
+3.1 HERANÇA DE TEMPLATES
+-------------------------
+Django permite criar um template BASE e outros herdam dele.
+
+BASE.HTML (template pai):
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>{% block title %}Meu Site{% endblock %}</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <!-- Menu sempre presente -->
+    </nav>
+    
+    {% block content %}
+        <!-- Conteúdo específico de cada página vai aqui -->
+    {% endblock %}
+    
+    <footer>
+        <!-- Rodapé sempre presente -->
+    </footer>
+</body>
+</html>
+```
+
+INDEX.HTML (template filho):
+```html
+{% extends 'base.html' %}
+
+{% block title %}Página Inicial{% endblock %}
+
+{% block content %}
+    <h1>Bem-vindo!</h1>
+    <p>Conteúdo específico da página inicial</p>
+{% endblock %}
+```
+
+RESULTADO:
+- Navbar e footer aparecem em TODAS as páginas
+- Só o conteúdo do block content muda
+
+
+3.2 EXEMPLO COMPLETO DO PROJETO
+--------------------------------
+
+BASE.HTML (leia_bem/templates/leia_bem/base.html):
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{% block title %}Leia Bem{% endblock %}</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome (ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS (animações) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        .estrelas {
+            color: #ffc107;
+        }
+        
+        .card-livro {
+            transition: transform 0.2s;
+            height: 100%;
+        }
+        
+        .card-livro:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="fas fa-book-reader"></i> Leia Bem
+            </a>
+            
+            <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">
+                            <i class="fas fa-home"></i> Início
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_livros' %}">
+                            <i class="fas fa-book"></i> Livros
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Sair</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- MENSAGENS -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- CONTEÚDO -->
+    <main class="container my-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <!-- RODAPÉ -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">&copy; 2024 Leia Bem. Aqui o povo lê... e recebe!</p>
+    </footer>
+    
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();  // Inicializa animações
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+```
+
+
+INDEX.HTML (página inicial):
+```html
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Início - Leia Bem{% endblock %}
+
+{% block content %}
+<!-- HERO (Banner de boas-vindas) -->
+<div class="jumbotron bg-light p-5 rounded-3 mb-4" data-aos="fade-up">
+    <div class="container-fluid py-5">
+        <h1 class="display-4">
+            <i class="fas fa-book-reader"></i> Bem-vindo ao Leia Bem!
+        </h1>
+        <p class="lead">
+            Aqui o povo lê... e recebe! Acompanhe suas leituras, ganhe Janjetas e compartilhe suas experiências! 📚
+        </p>
+        <hr class="my-4">
+        
+        {% if user.is_authenticated %}
+            <a class="btn btn-primary btn-lg" href="{% url 'meus_livros' %}">
+                <i class="fas fa-bookmark"></i> Ver Meus Livros
+            </a>
+        {% else %}
+            <a class="btn btn-success btn-lg" href="{% url 'signup' %}">
+                <i class="fas fa-user-plus"></i> Cadastre-se Grátis
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- LIVROS EM DESTAQUE -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>
+            <i class="fas fa-star text-warning"></i> Livros em Destaque
+        </h2>
+        <a href="{% url 'lista_livros' %}" class="btn btn-outline-primary">
+            Ver Todos <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for livro in livros_destaque %}
+            <div class="col" data-aos="zoom-in">
+                <div class="card card-livro h-100 shadow-sm">
+                    {% if livro.capa %}
+                        <img src="{{ livro.capa.url }}" class="card-img-top" 
+                             alt="{{ livro.titulo }}" 
+                             style="height: 250px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                             style="height: 250px;">
+                            <i class="fas fa-book fa-3x"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h6 class="card-title mb-2" style="height: 3em; overflow: hidden;">
+                            {{ livro.titulo }}
+                        </h6>
+                        
+                        {% if livro.escritor %}
+                            <p class="card-text small text-muted mb-2">
+                                <i class="fas fa-pen"></i> {{ livro.escritor.nome }}
+                            </p>
+                        {% endif %}
+
+                        <div class="mb-2">
+                            {% if livro.total_avaliacoes > 0 %}
+                                <span class="estrelas">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= livro.nota_media %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <small class="text-muted">
+                                    ({{ livro.total_avaliacoes }})
+                                </small>
+                            {% else %}
+                                <small class="text-muted">Sem avaliações</small>
+                            {% endif %}
+                        </div>
+
+                        <a href="{% url 'detalhe_livro' livro.id %}" 
+                           class="btn btn-sm btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+```
+
+
+================================================================================
+MÓDULO 4: BIBLIOTECAS EXTRAS
+================================================================================
+
+4.1 FONT AWESOME (Ícones)
+--------------------------
+```html
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Usando -->
+<i class="fas fa-book"></i>        <!-- Livro -->
+<i class="fas fa-star"></i>        <!-- Estrela cheia -->
+<i class="far fa-star"></i>        <!-- Estrela vazia -->
+<i class="fas fa-user"></i>        <!-- Usuário -->
+<i class="fas fa-heart"></i>       <!-- Coração -->
+<i class="fas fa-home"></i>        <!-- Casa -->
+<i class="fas fa-search"></i>      <!-- Lupa -->
+<i class="fas fa-trash"></i>       <!-- Lixeira -->
+<i class="fas fa-edit"></i>        <!-- Editar -->
+<i class="fas fa-plus"></i>        <!-- Mais -->
+<i class="fas fa-check"></i>       <!-- Check -->
+<i class="fas fa-trophy"></i>      <!-- Troféu -->
+<i class="fas fa-coins"></i>       <!-- Moedas -->
+
+<!-- Tamanhos -->
+<i class="fas fa-book fa-xs"></i>   <!-- Extra pequeno -->
+<i class="fas fa-book fa-sm"></i>   <!-- Pequeno -->
+<i class="fas fa-book fa-lg"></i>   <!-- Grande -->
+<i class="fas fa-book fa-2x"></i>   <!-- 2x -->
+<i class="fas fa-book fa-3x"></i>   <!-- 3x -->
+<i class="fas fa-book fa-5x"></i>   <!-- 5x -->
+
+<!-- Rotação -->
+<i class="fas fa-spinner fa-spin"></i>    <!-- Girando -->
+```
+
+4.2 AOS (Animate On Scroll)
+----------------------------
+Anima elementos quando aparecem na tela ao rolar.
+
+```html
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init();
+</script>
+
+<!-- Usando -->
+<div data-aos="fade-up">Aparece de baixo</div>
+<div data-aos="fade-down">Aparece de cima</div>
+<div data-aos="fade-left">Aparece da esquerda</div>
+<div data-aos="fade-right">Aparece da direita</div>
+<div data-aos="zoom-in">Zoom</div>
+<div data-aos="flip-left">Gira</div>
+
+<!-- Com delay -->
+<div data-aos="fade-up" data-aos-delay="100">Atraso 100ms</div>
+<div data-aos="fade-up" data-aos-delay="200">Atraso 200ms</div>
+```
+
+4.3 SWEETALERT2 (Alertas Bonitos)
+----------------------------------
+```html
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// Alerta simples
+Swal.fire('Título', 'Mensagem', 'success');
+
+// Confirmação
+Swal.fire({
+    title: 'Tem certeza?',
+    text: "Essa ação não pode ser desfeita!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, deletar!',
+    cancelButtonText: 'Cancelar'
+}).then((result) => {
+    if (result.isConfirmed) {
+        // Usuário confirmou
+    }
+});
+</script>
+```
+
+
+================================================================================
+MÓDULO 5: RESUMO E BOAS PRÁTICAS
+================================================================================
+
+5.1 CHECKLIST BOOTSTRAP
+------------------------
+✅ Sempre use container ou container-fluid
+✅ Use row antes de col
+✅ Pense mobile-first (col-12 col-md-6)
+✅ Use classes utilitárias (m-, p-, d-flex)
+✅ Prefira componentes prontos (btn, card, navbar)
+✅ Adicione ícones do Font Awesome
+✅ Teste responsividade (Ctrl+Shift+M no Chrome)
+
+5.2 HIERARQUIA DE CLASSES
+--------------------------
+Ordem recomendada:
+1. Componente (btn, card, navbar)
+2. Variante (btn-primary, bg-success)
+3. Tamanho (btn-lg, col-md-6)
+4. Espaçamento (m-3, p-4)
+5. Display (d-flex, d-none)
+6. Outras (w-100, shadow)
+
+EXEMPLO:
+```html
+<button class="btn btn-primary btn-lg mb-3 w-100">
+    <!--
+        btn = componente
+        btn-primary = variante
+        btn-lg = tamanho
+        mb-3 = espaçamento
+        w-100 = largura
+    -->
+</button>
+```
+
+5.3 ESTRUTURA RECOMENDADA
+--------------------------
+```html
+<div class="container">              <!-- Limita largura -->
+    <div class="row">                 <!-- Linha -->
+        <div class="col-md-8">        <!-- Coluna principal -->
+            <div class="card">        <!-- Componente -->
+                <div class="card-body">
+                    <!-- Conteúdo -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">        <!-- Sidebar -->
+            <!-- Conteúdo lateral -->
+        </div>
+    </div>
+</div>
+```
+
+5.4 DICAS FINAIS
+----------------
+✅ Documentação oficial: getbootstrap.com
+✅ Exemplos: getbootstrap.com/docs/5.3/examples/
+✅ Ícones: fontawesome.com/icons
+✅ Cores: Personalize em bootstrap.build
+✅ Templates prontos: startbootstrap.com
+
+================================================================================
+FIM DO MINICURSO
+================================================================================
+
+Parabéns! Agora você sabe:
+✅ HTML básico e semântico
+✅ Bootstrap completo (grid, componentes, utilitários)
+✅ Integração Django + Bootstrap
+✅ Font Awesome (ícones)
+✅ AOS (animações)
+✅ Boas práticas de estrutura
+
+Continue praticando e explorando a documentação! 🚀

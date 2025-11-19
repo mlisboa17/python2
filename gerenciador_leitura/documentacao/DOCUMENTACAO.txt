@@ -1,0 +1,581 @@
+================================================================================
+                    DOCUMENTAÇÃO DO PROJETO LEIA BEM
+        Sistema de Gerenciamento de Leitura com Gamificação (Janjetas)
+================================================================================
+
+================================================================================
+1. ARQUIVOS DE CONFIGURAÇÃO DO PROJETO
+================================================================================
+
+manage.py
+---------
+Arquivo de entrada do Django. Usado para executar comandos administrativos:
+- python manage.py runserver → Roda o servidor
+- python manage.py migrate → Aplica migrações no banco
+- python manage.py createsuperuser → Cria administrador
+
+db.sqlite3
+----------
+Banco de dados SQLite. Armazena TODOS os dados:
+- Usuários, livros, escritores, editoras
+- Progresso de leitura, avaliações
+- Pontuação (Janjetas) dos usuários
+
+================================================================================
+2. PASTA gerenciador_leitura/ (Configurações do Projeto)
+================================================================================
+
+gerenciador_leitura/settings.py
+--------------------------------
+Configurações principais do Django:
+- DEBUG = True → Modo desenvolvimento
+- ALLOWED_HOSTS = ['*'] → Aceita conexões de qualquer IP (rede local)
+- INSTALLED_APPS → Apps instalados (incluindo 'leia_bem')
+- AUTH_USER_MODEL = "leia_bem.Usuario" → Modelo de usuário personalizado
+- DATABASES → Configuração do SQLite
+- STATIC_URL, MEDIA_URL → Arquivos estáticos e uploads
+- LANGUAGE_CODE = 'pt-br' → Idioma português
+
+gerenciador_leitura/urls.py
+----------------------------
+Rotas principais do projeto:
+- /admin/ → Painel administrativo do Django
+- / → Delega para leia_bem/urls.py
+- /media/ → Serve imagens (capas de livros, fotos de escritores)
+
+gerenciador_leitura/wsgi.py
+----------------------------
+Arquivo para deploy em produção (servidor web).
+
+gerenciador_leitura/asgi.py
+----------------------------
+Arquivo para aplicações assíncronas (não usado neste projeto).
+
+================================================================================
+3. PASTA leia_bem/ (Aplicação Principal)
+================================================================================
+
+leia_bem/models.py
+------------------
+Define os MODELOS (tabelas do banco de dados):
+
+CLASSE Usuario(AbstractUser):
+- Herda campos: username, password, email, first_name, last_name, is_staff, etc.
+- Campos adicionados: email (único), nome_completo
+- Usada para autenticação e identificação dos leitores
+
+CLASSE Editora:
+- nome, site, telefone
+- Representa editoras de livros
+
+CLASSE Escritor:
+- nome, email, bibliografia, foto
+- Representa autores de livros
+
+CONSTANTES DE GAMIFICAÇÃO:
+- JANJETAS_POR_PAGINA = 0.01 → Cada página lida = 0.01 Janjetas
+- JANJETAS_BONUS_CONCLUSAO = 0.10 → Bônus ao terminar livro
+- JANJETAS_PODIO_PRIMEIRO = 300.00 → Bônus 1º lugar no ranking
+- JANJETAS_PODIO_SEGUNDO = 100.00 → Bônus 2º lugar
+- JANJETAS_PODIO_TERCEIRO = 50.00 → Bônus 3º lugar
+
+LISTA PARODIAS_MOTIVACIONAIS:
+- 21 frases humorísticas com temas políticos brasileiros
+- Exibidas quando usuário tenta avaliar livro sem terminar
+
+CLASSE Livro:
+- titulo, escritor, editora, ano_publicacao, numero_paginas
+- sinopse, isbn, capa (imagem)
+- nota_media, total_avaliacoes (calculados automaticamente)
+- Método: atualizar_estatisticas_avaliacao()
+
+CLASSE ProgressoLeitura:
+- usuario, livro, pagina_atual, porcentagem, pontos (Janjetas)
+- status: LENDO, CONCLUIDO, PAUSADO
+- Campos de gamificação: total_sessoes, sequencia_atual, maior_sequencia_diaria
+- Métodos:
+  * atualizar_por_pagina() → Atualiza progresso e calcula Janjetas
+  * registrar_sessao() → Registra sessão de leitura com bônus de streak
+
+CLASSE Avaliacao:
+- usuario, livro, nota (1-5 estrelas), comentario
+- criado, atualizado (timestamps)
+- Signals: Atualiza nota média do livro automaticamente ao criar/deletar
+
+leia_bem/views.py
+-----------------
+Funções que processam requisições HTTP e retornam páginas:
+
+PÁGINAS PÚBLICAS:
+- index() → Página inicial com livros em destaque
+- lista_livros() → Lista completa de livros com busca e filtros
+- detalhe_livro() → Detalhes de um livro + avaliações + paródia motivacional
+- signup() → Cadastro de novos usuários
+
+ÁREA DO USUÁRIO (requer login):
+- meus_livros() → Biblioteca pessoal do usuário
+- adicionar_livro_leitura() → Adiciona livro à lista do usuário
+- atualizar_progresso() → Atualiza páginas lidas ou status do livro
+- registrar_sessao_leitura() → Registra sessão com bônus de streak
+- adicionar_avaliacao() → Avalia livro (só se status = CONCLUIDO)
+- perfil_usuario() → Estatísticas pessoais do usuário
+- celebrar_conclusao() → Página de celebração com confetti e bônus de pódio
+
+GAMIFICAÇÃO:
+- ranking_pontos() → Ranking de usuários por Janjetas
+
+GERENCIAMENTO (apenas superusuários):
+- gerenciar_dashboard() → Dashboard com estatísticas gerais
+- CRUD Livros: gerenciar_livros(), criar_livro(), editar_livro(), deletar_livro()
+- CRUD Escritores: gerenciar_escritores(), criar_escritor(), editar_escritor(), deletar_escritor()
+- CRUD Editoras: gerenciar_editoras(), criar_editora(), editar_editora(), deletar_editora()
+
+leia_bem/forms.py
+-----------------
+Formulários para entrada de dados:
+
+SignUpForm:
+- Herda UserCreationForm (Django)
+- Campos: username, email, nome_completo, password1, password2
+- Validação: Verifica se email já existe
+- Personalização: Classes Bootstrap para campos de senha
+
+LivroForm:
+- ModelForm para criar/editar livros
+- Campos: titulo, escritor, editora, ano_publicacao, numero_paginas, sinopse, isbn, capa
+- Widgets Bootstrap para aparência
+
+EscritorForm:
+- ModelForm para criar/editar escritores
+- Campos: nome, email, bibliografia, foto
+
+EditoraForm:
+- ModelForm para criar/editar editoras
+- Campos: nome, site, telefone
+
+leia_bem/urls.py
+----------------
+Rotas da aplicação (todas começam com /)
+
+PÚBLICAS:
+- '' → index (página inicial)
+- 'cadastro/' → signup
+- 'livros/' → lista_livros
+- 'livros/<id>/' → detalhe_livro
+
+USUÁRIO LOGADO:
+- 'meus-livros/' → meus_livros
+- 'livros/<id>/adicionar/' → adicionar_livro_leitura
+- 'progresso/<id>/atualizar/' → atualizar_progresso
+- 'progresso/<id>/sessao/' → registrar_sessao_leitura
+- 'livros/<id>/avaliar/' → adicionar_avaliacao
+- 'ranking/' → ranking_pontos
+- 'perfil/' → perfil_usuario
+- 'celebracao/<id>/' → celebrar_conclusao
+
+GERENCIAMENTO (superusuários):
+- 'gerenciar/' → dashboard
+- 'gerenciar/livros/' → lista de livros
+- 'gerenciar/livros/criar/' → criar livro
+- 'gerenciar/livros/<id>/editar/' → editar livro
+- 'gerenciar/livros/<id>/deletar/' → deletar livro
+(mesma estrutura para escritores e editoras)
+
+leia_bem/admin.py
+-----------------
+Configuração do painel administrativo do Django (/admin/).
+Registra modelos para gerenciamento via interface padrão.
+
+leia_bem/apps.py
+----------------
+Configuração da aplicação leia_bem.
+
+leia_bem/tests.py
+-----------------
+Arquivo para testes unitários (vazio atualmente).
+
+================================================================================
+4. PASTA leia_bem/templates/ (HTML)
+================================================================================
+
+leia_bem/templates/leia_bem/base.html
+--------------------------------------
+Template BASE - Todos os outros herdam dele:
+- Navbar com links (Início, Livros, Meus Livros, Ranking, Perfil)
+- Link "Gerenciar" (aparece só para superusuários)
+- Imports: Bootstrap 5.3.0, Font Awesome 6.4.0, AOS (animações)
+- Footer com informações do site
+- Estilos CSS personalizados
+
+leia_bem/templates/leia_bem/index.html
+---------------------------------------
+Página inicial:
+- Hero section com animação
+- 6 livros em destaque (maior nota média)
+- Cards com capas, títulos, escritores
+- Botão "Adicionar à Minha Lista" (só para logados)
+
+leia_bem/templates/leia_bem/lista_livros.html
+----------------------------------------------
+Lista completa de livros:
+- Barra de busca (título, escritor, editora)
+- Filtro de ordenação (nota, título, ano)
+- Grid de cards com todos os livros
+- Informações: capa, título, escritor, ano, páginas, nota média
+
+leia_bem/templates/leia_bem/detalhe_livro.html
+-----------------------------------------------
+Detalhes completos de um livro:
+- Capa grande, sinopse, ISBN
+- Informações do escritor e editora
+- Avaliações de outros usuários
+- Formulário de avaliação (só se terminou de ler)
+- Card motivacional com paródia (se não terminou)
+- Barra de progresso do usuário
+
+leia_bem/templates/leia_bem/meus_livros.html
+---------------------------------------------
+Biblioteca pessoal do usuário:
+- Filtros: Todos, Lendo, Concluído, Pausado
+- Cards com progresso de cada livro
+- Barra de progresso visual
+- Botões: Atualizar, Registrar Sessão, Detalhes
+- Modais para atualizar progresso e registrar sessão
+- Livros concluídos: botão "Concluído" desabilitado
+
+leia_bem/templates/leia_bem/celebracao.html
+--------------------------------------------
+Página de celebração ao terminar livro:
+- Confetti animado (canvas-confetti.js)
+- Mensagem de parabéns
+- Mostra Janjetas ganhas (grande e festivo)
+- Bônus de pódio (se entrou no top 3)
+- Posição no ranking
+
+leia_bem/templates/leia_bem/ranking.html
+-----------------------------------------
+Ranking de usuários:
+- Top 3 em pódio visual (ouro, prata, bronze)
+- Tabela com todos os usuários
+- Ícone de moeda (fa-coins) ao lado das Janjetas
+- Destaque para usuário atual
+
+leia_bem/templates/leia_bem/perfil.html
+----------------------------------------
+Perfil do usuário:
+- Estatísticas: total de livros, concluídos, lendo
+- Total de Janjetas
+- Sessões de leitura e maior sequência
+- Livros recentes
+- Avaliações recentes
+
+leia_bem/templates/leia_bem/signup.html
+----------------------------------------
+Página de cadastro:
+- Formulário: username, email, nome completo, senhas
+- Validação de email único
+- Link para login se já tem conta
+
+leia_bem/templates/registration/login.html
+-------------------------------------------
+Página de login:
+- Formulário: username e senha
+- Link para cadastro
+- Mensagens de erro se login falhar
+
+================================================================================
+5. PASTA leia_bem/templates/leia_bem/gerenciar/ (CRUD)
+================================================================================
+
+dashboard.html
+--------------
+Dashboard administrativo:
+- 4 cards com estatísticas: total de livros, escritores, editoras, usuários
+- 3 cards de ações: Gerenciar Livros, Escritores, Editoras
+- Botões para criar novos registros
+
+livros_lista.html
+-----------------
+Lista de livros para gerenciamento:
+- Tabela com: capa, título, escritor, editora, ano, páginas, nota
+- Botões: Ver, Editar, Deletar
+
+livro_form.html
+---------------
+Formulário criar/editar livro:
+- Campos: título, escritor, editora, ano, páginas, sinopse, ISBN, capa
+- Pré-visualização da capa (ao editar)
+
+livro_confirmar_delete.html
+---------------------------
+Confirmação antes de deletar livro:
+- Mostra capa e informações
+- Aviso que não pode ser desfeito
+
+escritores_lista.html
+---------------------
+Lista de escritores em cards:
+- Foto, nome, email, biografia
+- Quantidade de livros
+- Botões: Editar, Deletar
+
+escritor_form.html
+------------------
+Formulário criar/editar escritor:
+- Campos: nome, email, biografia, foto
+
+escritor_confirmar_delete.html
+------------------------------
+Confirmação de exclusão de escritor.
+
+editoras_lista.html
+-------------------
+Tabela de editoras:
+- Nome, site (link externo), telefone
+- Botões: Editar, Deletar
+
+editora_form.html
+-----------------
+Formulário criar/editar editora:
+- Campos: nome, site, telefone
+
+editora_confirmar_delete.html
+-----------------------------
+Confirmação de exclusão de editora.
+
+================================================================================
+6. PASTA leia_bem/migrations/
+================================================================================
+
+Arquivos gerados automaticamente pelo Django:
+- Criam/modificam tabelas no banco de dados
+- Executados com: python manage.py migrate
+
+0001_initial.py
+---------------
+Primeira migração: Cria todas as tabelas iniciais.
+
+0002_alter_escritor_email.py
+----------------------------
+Altera campo email do escritor para permitir nulo.
+
+0003_livro_isbn_livro_sinopse.py
+--------------------------------
+Adiciona campos ISBN e sinopse ao modelo Livro.
+
+0004_alter_progressoleitura_pontos.py
+-------------------------------------
+Muda campo pontos de IntegerField para DecimalField(10,2).
+Necessário para Janjetas com decimais (0.01, 0.10).
+
+================================================================================
+7. PASTA leia_bem/management/commands/
+================================================================================
+
+Comandos personalizados executados com: python manage.py <comando>
+
+cadastrar_editoras.py
+---------------------
+Comando: python manage.py cadastrar_editoras
+Cadastra editoras brasileiras no banco.
+
+cadastrar_escritores.py
+-----------------------
+Comando: python manage.py cadastrar_escritores
+Cadastra escritores brasileiros com fotos.
+
+cadastrar_livros.py
+-------------------
+Comando: python manage.py cadastrar_livros
+Cadastra livros de literatura brasileira com capas.
+
+setup_completo.py
+-----------------
+Comando: python manage.py setup_completo
+Executa todos os comandos acima de uma vez.
+
+================================================================================
+8. PASTA media/
+================================================================================
+
+media/livros/capas/
+-------------------
+Armazena imagens das capas dos livros (upload via CRUD).
+
+media/escritores/fotos/
+-----------------------
+Armazena fotos dos escritores (upload via CRUD).
+
+media/janjetas.png
+------------------
+Imagem/ícone das Janjetas (moeda do sistema).
+
+================================================================================
+9. TECNOLOGIAS UTILIZADAS
+================================================================================
+
+BACKEND:
+- Django 5.2.7 → Framework web Python
+- Python 3.14 → Linguagem
+- SQLite → Banco de dados
+
+FRONTEND:
+- Bootstrap 5.3.0 → Framework CSS responsivo
+- Font Awesome 6.4.0 → Ícones
+- AOS (Animate On Scroll) → Animações ao rolar página
+- SweetAlert2 → Alertas bonitos
+- Canvas Confetti → Efeito de confete na celebração
+
+BIBLIOTECAS PYTHON:
+- Pillow → Manipulação de imagens
+- django.contrib.auth → Sistema de autenticação
+
+================================================================================
+10. FLUXO DE FUNCIONAMENTO
+================================================================================
+
+1. USUÁRIO ACESSA O SITE:
+   - Vê livros em destaque na home
+   - Pode navegar e ver detalhes sem login
+
+2. USUÁRIO CRIA CONTA:
+   - Preenche formulário de cadastro (signup.html)
+   - SignUpForm valida dados
+   - Modelo Usuario cria registro no banco
+   - Usuário é automaticamente logado
+
+3. USUÁRIO ADICIONA LIVRO:
+   - Clica em "Adicionar à Minha Lista"
+   - ProgressoLeitura é criado (status=LENDO, páginas=0, pontos=0)
+
+4. USUÁRIO LÊ O LIVRO:
+   - Atualiza progresso (páginas lidas)
+   - Método atualizar_por_pagina() calcula:
+     * Porcentagem = (pagina_atual / total_paginas) * 100
+     * Janjetas = paginas * 0.01
+   - Pode registrar sessões de leitura (ganha bônus de streak)
+
+5. USUÁRIO TERMINA O LIVRO:
+   - Status muda para CONCLUIDO automaticamente ao atingir 100%
+   - Recebe bônus: total_paginas * 0.10 Janjetas
+   - Redirecionado para celebracao.html
+   - Confetti explode na tela
+   - Se entrou no top 3 → ganha bônus de pódio (50/100/300 Janjetas)
+
+6. USUÁRIO AVALIA O LIVRO:
+   - Só pode avaliar se status = CONCLUIDO
+   - Se tentar antes: vê paródia motivacional
+   - Avaliacao é criada no banco
+   - Signal atualiza nota_media do livro automaticamente
+   - Ganha 3 Janjetas por avaliar
+
+7. RANKING:
+   - Calcula Sum(pontos) de todos os ProgressoLeitura por usuário
+   - Ordena por total_pontos decrescente
+   - Mostra top 50 no ranking
+
+8. SUPERUSUÁRIO GERENCIA:
+   - Acessa /gerenciar/
+   - Pode criar/editar/deletar livros, escritores, editoras
+   - Usa formulários ModelForm com Bootstrap
+   - Upload de imagens (capas, fotos)
+
+================================================================================
+11. SISTEMA DE JANJETAS (GAMIFICAÇÃO)
+================================================================================
+
+COMO GANHAR JANJETAS:
+
+1. Lendo páginas:
+   - 0.01 Janjetas por página
+   - Exemplo: 100 páginas = 1.00 Janjeta
+
+2. Terminando livro:
+   - Bônus = número_de_páginas * 0.10
+   - Exemplo: Livro de 300 páginas = 30 Janjetas de bônus
+   - Total ao terminar 300 páginas: 3.00 + 30.00 = 33.00 Janjetas
+
+3. Registrando sessões:
+   - 5 Janjetas base por sessão
+   - Bônus de streak: 3 Janjetas por dia consecutivo (máx 15)
+   - Exemplo: 5 dias seguidos = 5 + 15 = 20 Janjetas por sessão
+
+4. Avaliando livro:
+   - 3 Janjetas (primeira avaliação apenas)
+
+5. Bônus de pódio:
+   - 1º lugar: +300 Janjetas
+   - 2º lugar: +100 Janjetas
+   - 3º lugar: +50 Janjetas
+   - Recebe ao terminar um livro SE estiver no top 3
+
+ONDE VER JANJETAS:
+- Perfil pessoal
+- Ranking geral
+- Cards de livros em "Meus Livros"
+- Página de celebração
+
+================================================================================
+12. SEGURANÇA E PERMISSÕES
+================================================================================
+
+DECORADORES USADOS:
+- @login_required → Usuário precisa estar logado
+- @staff_member_required → Apenas superusuários (is_staff=True)
+
+PÁGINAS PÚBLICAS (sem login):
+- Página inicial
+- Lista de livros
+- Detalhes do livro
+- Cadastro e login
+
+PÁGINAS RESTRITAS (login obrigatório):
+- Minha biblioteca
+- Adicionar livro à lista
+- Atualizar progresso
+- Registrar sessão
+- Avaliar livro
+- Ranking
+- Perfil
+
+PÁGINAS ADMINISTRATIVAS (superusuário):
+- Dashboard de gerenciamento
+- CRUD de livros, escritores, editoras
+
+VALIDAÇÕES:
+- Email único no cadastro
+- Só pode avaliar livro se terminou de ler
+- Livro concluído não pode ser editado
+- Senhas devem coincidir no cadastro
+
+================================================================================
+13. COMANDOS ÚTEIS
+================================================================================
+
+# Rodar servidor local
+python manage.py runserver
+
+# Rodar servidor acessível na rede local
+python manage.py runserver 0.0.0.0:8000
+
+# Criar migrações
+python manage.py makemigrations
+
+# Aplicar migrações
+python manage.py migrate
+
+# Criar superusuário
+python manage.py createsuperuser
+
+# Popular banco com dados
+python manage.py setup_completo
+
+# Comandos Git
+git status
+git add .
+git commit -m "mensagem"
+git push origin master
+
+================================================================================
+FIM DA DOCUMENTAÇÃO
+================================================================================

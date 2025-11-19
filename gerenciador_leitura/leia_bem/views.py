@@ -1,16 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Count
 from .models import Livro, ProgressoLeitura, Avaliacao, Escritor, Editora
 from .forms import SignUpForm
 
 
 def index(request):
-    """Página inicial"""
+    #Página inicial
     livros_destaque = Livro.objects.order_by('-nota_media')[:6]
     
     # Se usuário logado, verificar quais livros já estão na biblioteca
@@ -365,6 +366,11 @@ def celebrar_conclusao(request, progresso_id):
         'bonus_podio': bonus_podio,
         'posicao_podio': posicao_antiga,
     })
+
+
+# View customizada de login usando o template em leia_bem/
+class CustomLoginView(LoginView):
+    template_name = 'leia_bem/login.html'
 
 
 def signup(request):

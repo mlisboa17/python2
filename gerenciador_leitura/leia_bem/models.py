@@ -12,7 +12,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class Usuario(AbstractUser):
     """
     Modelo de usuário personalizado.
-    Usa os campos padrão de AbstractUser (username, password, first_name, last_name, email, is_staff, etc.)
+    Usa os campos padrão de AbstractUser (username, password, first_name, last_name, email, is_staff, etc)
     Adiciona email como único e um campo opcional nome_completo.
     """
     email = models.EmailField("E-mail", unique=True)

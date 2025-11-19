@@ -27,9 +27,9 @@ class SignUpForm(UserCreationForm):
         required=True,  #  não pode deixar vazio
         label="Email",  # O texto que aparece no campo
         widget=forms.EmailInput(attrs={
-            # *** BOOTSTRAP APLICADO AQUI ***
+            #BOOTSTRAP APLICADO AQUI
             # 'class' = classes CSS do Bootstrap para deixar o campo bonito
-            # Bootstrap é CSS (aparência), NÃO é herança Python!
+            # Bootstrap é CSS (aparência), 
             'class': 'form-control form-control-lg',  # Classes do framework Bootstrap
             'placeholder': 'seu@email.com',  
         })
@@ -57,7 +57,7 @@ class SignUpForm(UserCreationForm):
         # Personalizando a aparência dos campos
         widgets = {
             'username': forms.TextInput(attrs={
-                # *** BOOTSTRAP APLICADO AQUI ***
+                
                 'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
                 'placeholder': 'adicione um username',
             }),
@@ -71,8 +71,7 @@ class SignUpForm(UserCreationForm):
         """
         super().__init__(*args, **kwargs)  # Chama o construtor da classe pai (UserCreationForm)
         
-        # *** BOOTSTRAP APLICADO AQUI ***
-        # Adiciona classes CSS Bootstrap nos campos de senha
+               # Adiciona classes CSS Bootstrap nos campos de senha
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control form-control-lg',  # Classes CSS Bootstrap
             'placeholder': '********',
@@ -189,7 +188,7 @@ class EditoraForm(forms.ModelForm):
     class Meta:
         model = Editora
         fields = ['nome', 'site', 'telefone']
-        # *** BOOTSTRAP APLICADO AQUI (nos widgets) ***
+        # BOOTSTRAP APLICADO AQUI (nos widgets)
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da editora'}),  # CSS Bootstrap
             'site': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'http://www.editora.com.br'}),  # CSS Bootstrap

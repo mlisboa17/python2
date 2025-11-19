@@ -9,6 +9,9 @@ urlpatterns = [
     # Página inicial do site
     path('', views.index, name='index'),
     
+    # Página de login customizada
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    
     # Página de cadastro - cria uma nova conta
     path('cadastro/', views.signup, name='signup'),
     
@@ -63,9 +66,9 @@ urlpatterns = [
     path('celebracao/<int:progresso_id>/', views.celebrar_conclusao, name='celebrar_conclusao'),
     
     
-    # ==========================================
-    # GERENCIAMENTO - Apenas para superusuários
-    # ==========================================
+    
+    #sessao para superusuários
+    
     
     # Dashboard de gerenciamento
     path('gerenciar/', views.gerenciar_dashboard, name='gerenciar_dashboard'),

@@ -1,0 +1,1591 @@
+================================================================================
+                    MINICURSO COMPLETO DE DJANGO + BOOTSTRAP
+                    Baseado no Projeto "Leia Bem"
+================================================================================
+
+================================================================================
+MÓDULO 1: INTRODUÇÃO AO DJANGO
+================================================================================
+
+1.1 O QUE É DJANGO?
+-------------------
+Django é um framework web em Python que segue o padrão MVT:
+- M (Model): Modelos = Estrutura do banco de dados
+- V (View): Views = Lógica de processamento
+- T (Template): Templates = Interface visual (HTML)
+
+ANALOGIA: Django é como um esqueleto pronto de uma casa. Você não precisa
+construir as paredes, o chão e o teto do zero - Django já te dá isso!
+
+1.2 ESTRUTURA DE UM PROJETO DJANGO
+----------------------------------
+projeto/                    ← Pasta raiz
+├── manage.py              ← Gerenciador do Django
+├── db.sqlite3             ← Banco de dados
+├── gerenciador_leitura/   ← Configurações do projeto
+│   ├── settings.py        ← Configurações gerais
+│   ├── urls.py            ← Rotas principais
+│   └── wsgi.py            ← Deploy em produção
+└── leia_bem/              ← Aplicação (app)
+    ├── models.py          ← Modelos (tabelas)
+    ├── views.py           ← Lógica das páginas
+    ├── urls.py            ← Rotas da aplicação
+    ├── forms.py           ← Formulários
+    ├── admin.py           ← Painel administrativo
+    └── templates/         ← HTML
+
+1.3 COMANDOS BÁSICOS
+--------------------
+python manage.py runserver          → Roda o servidor
+python manage.py makemigrations     → Cria migrações
+python manage.py migrate            → Aplica migrações
+python manage.py createsuperuser    → Cria admin
+
+================================================================================
+MÓDULO 2: MODELS (BANCO DE DADOS)
+================================================================================
+
+2.1 O QUE SÃO MODELS?
+---------------------
+Models são CLASSES Python que representam TABELAS no banco de dados.
+Cada atributo da classe = uma COLUNA na tabela.
+
+EXEMPLO DO PROJETO:
+```python
+class Editora(models.Model):
+    nome = models.CharField(max_length=200)      # Coluna "nome" (texto)
+    site = models.URLField(blank=True)           # Coluna "site" (URL)
+    telefone = models.CharField(max_length=30, blank=True)
+```
+
+Isso cria uma tabela chamada "editora" com 3 colunas!
+
+2.2 TIPOS DE CAMPOS (FIELD TYPES)
+----------------------------------
+CharField(max_length=X)        → Texto curto (até X caracteres)
+TextField()                    → Texto longo (sem limite)
+EmailField()                   → Email (valida formato)
+URLField()                     → URL (valida formato)
+IntegerField()                 → Número inteiro
+PositiveIntegerField()         → Número inteiro positivo
+DecimalField(max_digits, decimal_places) → Decimal (ex: dinheiro)
+BooleanField()                 → True/False
+DateField()                    → Data
+DateTimeField()                → Data + Hora
+ImageField(upload_to="pasta/") → Imagem (upload)
+FileField(upload_to="pasta/")  → Arquivo qualquer
+
+PARÂMETROS IMPORTANTES:
+- blank=True → Pode ficar vazio no formulário
+- null=True → Pode ser NULL no banco
+- default=valor → Valor padrão
+- unique=True → Valor único (não pode repetir)
+- choices=lista → Lista de opções
+
+EXEMPLO NO PROJETO:
+```python
+class ProgressoLeitura(models.Model):
+    STATUS_CHOICES = [
+        ("LENDO", "Lendo"),
+        ("CONCLUIDO", "Concluído"),
+        ("PAUSADO", "Pausado"),
+    ]
+    
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="LENDO")
+    pagina_atual = models.PositiveIntegerField(default=0)
+    pontos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+```
+
+2.3 RELACIONAMENTOS (FOREIGN KEY)
+----------------------------------
+ForeignKey: Relacionamento "muitos para um" (N:1)
+
+EXEMPLO:
+```python
+class Livro(models.Model):
+    escritor = models.ForeignKey("Escritor", on_delete=models.SET_NULL, null=True)
+```
+
+Isso significa: UM escritor pode ter VÁRIOS livros.
+                 Mas CADA livro tem APENAS UM escritor.
+
+on_delete=models.SET_NULL → Se deletar escritor, livro.escritor vira NULL
+on_delete=models.CASCADE → Se deletar escritor, deleta TODOS os livros dele
+on_delete=models.PROTECT → NÃO permite deletar escritor se tem livros
+
+2.4 MÉTODOS DO MODEL
+---------------------
+__str__(self): Define como o objeto aparece em texto
+
+```python
+class Editora(models.Model):
+    nome = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.nome  # Quando printar, mostra o nome
+```
+
+Métodos personalizados:
+```python
+class Livro(models.Model):
+    def atualizar_estatisticas_avaliacao(self):
+        # Lógica customizada
+        agg = self.avaliacoes.aggregate(media=Avg("nota"))
+        self.nota_media = agg["media"] or 0
+        self.save()
+```
+
+2.5 META CLASS
+--------------
+Configurações adicionais do modelo:
+
+IMPORTANTE: A classe Meta é uma classe INTERNA que fica DENTRO do Model.
+Ela NÃO cria colunas no banco de dados!
+Ela serve apenas para configurar COMPORTAMENTOS do modelo.
+
+É como se fosse o "manual de instruções" de como Django deve tratar o modelo.
+
+```python
+class Livro(models.Model):
+    titulo = models.CharField(max_length=300)
+    
+    class Meta:  # ← Classe especial DENTRO do Model (não é herança!)
+        db_table = "livro"              # Nome da tabela
+        verbose_name = "Livro"          # Nome no admin (singular)
+        verbose_name_plural = "Livros"  # Nome no admin (plural)
+        ordering = ['-criado']          # Ordenação padrão
+        unique_together = ("usuario", "livro")  # Combinação única
+        indexes = [models.Index(fields=["titulo"])]  # Índice (busca rápida)
+```
+
+2.6 SIGNALS (GATILHOS AUTOMÁTICOS)
+-----------------------------------
+Signals executam código automaticamente quando algo acontece.
+
+```python
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Avaliacao)
+def on_avaliacao_saved(sender, instance, created, **kwargs):
+    # Esse código roda SEMPRE que uma Avaliacao for salva
+    instance.livro.atualizar_estatisticas_avaliacao()
+```
+
+Tipos de signals:
+- post_save → Depois de salvar
+- pre_save → Antes de salvar
+- post_delete → Depois de deletar
+- pre_delete → Antes de deletar
+
+2.7 HERANÇA DE MODELS
+----------------------
+Você pode herdar de models prontos do Django:
+
+```python
+from django.contrib.auth.models import AbstractUser
+
+class Usuario(AbstractUser):
+    # Herda: username, password, email, first_name, last_name, is_staff
+    # Adiciona:
+    nome_completo = models.CharField(max_length=200, blank=True)
+```
+
+2.8 VALIDATORS (VALIDADORES)
+-----------------------------
+Garantem que dados estão no formato correto:
+
+```python
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+class Avaliacao(models.Model):
+    nota = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+```
+
+Isso garante: nota só pode ser 1, 2, 3, 4 ou 5!
+
+================================================================================
+MÓDULO 3: VIEWS (LÓGICA DAS PÁGINAS)
+================================================================================
+
+3.1 O QUE SÃO VIEWS?
+---------------------
+Views são FUNÇÕES Python que:
+1. Recebem uma requisição HTTP (request)
+2. Processam dados (buscar no banco, calcular, etc)
+3. Retornam uma resposta (HTML, JSON, redirect)
+
+ESTRUTURA BÁSICA:
+```python
+def nome_da_view(request):
+    # Processa dados
+    contexto = {'variavel': valor}
+    return render(request, 'template.html', contexto)
+```
+
+3.2 TIPOS DE VIEWS
+------------------
+
+A) FUNCTION-BASED VIEWS (FBV):
+```python
+def index(request):
+    # 1. Busca todos os livros no banco de dados
+    livros = Livro.objects.all()
+    
+    # 2. Renderiza template e passa os livros como contexto
+    return render(request, 'index.html', {'livros': livros})
+    
+# O QUE ESSA VIEW FAZ:
+# - Recebe requisição HTTP (quando usuário acessa a URL)
+# - Consulta banco de dados (Livro.objects.all())
+# - Retorna HTML renderizado com dados (render())
+```
+
+B) CLASS-BASED VIEWS (CBV):
+```python
+from django.views.generic import ListView
+
+class LivroListView(ListView):
+    model = Livro               # Define qual Model usar
+    template_name = 'livros.html'  # Define qual template renderizar
+    
+# O QUE ESSA VIEW FAZ:
+# - Automaticamente busca todos os Livros
+# - Automaticamente renderiza o template
+# - Menos código, mas menos controle
+```
+
+PROJETO USA: Function-Based Views (mais simples e diretas)
+Function-Based Views" (FBVs) são funções Python simples que recebem uma requisição web
+e retornam uma resposta HTTP. Elas são um dos dois métodos principais
+(sendo o outro as Class-Based Views, ou CBVs) para escrever a lógica de visualização
+ em frameworks de desenvolvimento web, especialmente no Django. 
+
+3.3 RENDER vs REDIRECT
+-----------------------
+render() → Mostra um template HTML
+redirect() → Redireciona para outra URL
+
+```python
+def adicionar_livro(request):
+    if request.method == 'POST':
+        # Salva no banco
+        messages.success(request, 'Livro adicionado!')
+        return redirect('meus_livros')  # Vai para outra página
+        
+        # O QUE redirect() FAZ:
+        # - Manda o navegador acessar outra URL
+        # - Não renderiza nada, só redireciona
+        # - Útil após salvar dados (evita duplicação se F5)
+    else:
+        return render(request, 'form.html')  # Mostra formulário
+        
+        # O QUE render() FAZ:
+        # - Processa template HTML
+        # - Substitui {{ variáveis }} por valores
+        # - Retorna HTML pronto pro navegador
+```
+
+3.4 REQUEST E RESPONSE
+----------------------
+request.method → 'GET' ou 'POST'
+request.user → Usuário logado
+request.GET → Parâmetros da URL (?q=livro)
+request.POST → Dados de formulário
+request.FILES → Arquivos enviados
+
+EXEMPLO DO PROJETO:
+```python
+def lista_livros(request):
+    # 1. Busca todos os livros
+    livros = Livro.objects.all()
+    
+    # 2. Verifica se tem busca na URL (?q=termo)
+    query = request.GET.get('q')  # Pega ?q=algo da URL
+    
+    # 3. Se tiver busca, filtra os livros
+    if query:
+        livros = livros.filter(titulo__icontains=query)
+    
+    # 4. Renderiza template com livros (filtrados ou todos)
+    return render(request, 'lista.html', {'livros': livros})
+    
+# O QUE ESSA VIEW FAZ PASSO A PASSO:
+# 1. Usuário acessa /livros/ → request.method = 'GET'
+# 2. Se URL for /livros/?q=python → query = 'python'
+# 3. Filtra livros que tenham "python" no título
+# 4. Envia livros pro template lista.html
+# 5. Template mostra lista de livros na página
+```
+
+3.5 QUERYSETS (BUSCAR NO BANCO)
+--------------------------------
+QUERYSETS são como "perguntas" ao banco de dados.
+Cada método retorna dados filtrados/ordenados.
+
+Livro.objects.all()                    → Todos os livros
+    # O QUE FAZ: SELECT * FROM livro
+    # RETORNA: Lista com TODOS os livros do banco
+    
+Livro.objects.filter(ano=2024)         → Filtra por condição
+    # O QUE FAZ: SELECT * FROM livro WHERE ano = 2024
+    # RETORNA: Lista com livros publicados em 2024
+    
+Livro.objects.get(id=5)                → Pega 1 objeto (erro se não achar)
+    # O QUE FAZ: SELECT * FROM livro WHERE id = 5 LIMIT 1
+    # RETORNA: UM objeto Livro (não é lista!)
+    # ATENÇÃO: Dá erro se não existir ou se existir mais de 1
+    
+Livro.objects.exclude(ano=2024)        → Exclui por condição
+    # O QUE FAZ: SELECT * FROM livro WHERE ano != 2024
+    # RETORNA: Todos os livros EXCETO os de 2024
+    
+Livro.objects.order_by('-nota_media')  → Ordena (- = decrescente)
+    # O QUE FAZ: SELECT * FROM livro ORDER BY nota_media DESC
+    # RETORNA: Livros ordenados da maior nota pra menor
+    # SEM "-" seria ordem crescente (menor pra maior)
+    
+Livro.objects.count()                  → Conta quantos
+    # O QUE FAZ: SELECT COUNT(*) FROM livro
+    # RETORNA: Número (int) com quantidade de livros
+
+LOOKUPS (FILTROS AVANÇADOS):
+Lookups são "modificadores" que vão depois de __ (dois underlines)
+
+campo__exact=valor       → Exatamente igual
+    # titulo__exact='Python' → título é EXATAMENTE "Python"
+    
+campo__iexact=valor      → Igual (ignora maiúsculas)
+    # titulo__iexact='python' → encontra "Python", "PYTHON", "python"
+    
+campo__contains=valor    → Contém (case-sensitive)
+    # titulo__contains='Python' → encontra "Aprenda Python"
+    # NÃO encontra "aprenda python" (diferença maiúscula/minúscula)
+    
+campo__icontains=valor   → Contém (ignora maiúsculas)
+    # titulo__icontains='python' → encontra "Aprenda PYTHON", "python básico"
+    # MAIS USADO para buscas!
+    
+campo__in=[1,2,3]        → Está na lista
+    # ano__in=[2020, 2021, 2022] → livros de 2020 OU 2021 OU 2022
+    
+campo__gt=10             → Maior que (greater than)
+    # paginas__gt=200 → livros com MAIS de 200 páginas
+    
+campo__gte=10            → Maior ou igual
+    # paginas__gte=200 → livros com 200 ou mais páginas
+    
+campo__lt=10             → Menor que
+    # preco__lt=50 → livros com preço menor que R$50
+    
+campo__lte=10            → Menor ou igual
+    # preco__lte=50 → livros até R$50 (incluindo R$50)
+    
+campo__startswith='A'    → Começa com
+    # titulo__startswith='Python' → "Python para Iniciantes", "Python Avançado"
+    
+campo__endswith='Z'      → Termina com
+    # titulo__endswith='Brasil' → "História do Brasil", "Geografia do Brasil"
+    
+campo__isnull=True       → É NULL
+    # editora__isnull=True → livros SEM editora
+    # editora__isnull=False → livros COM editora
+
+EXEMPLO:
+```python
+# Busca livros que tenham "Python" no título (ignora maiúsculas)
+livros = Livro.objects.filter(titulo__icontains='python')
+# O QUE FAZ:
+# 1. Busca no banco todos os livros
+# 2. Filtra os que têm "python" no título (ignora maiúscula/minúscula)
+# 3. Retorna lista com resultados
+# EXEMPLO: Encontra "Python Básico", "Aprenda PYTHON", "python avançado"
+
+# Busca livros com mais de 200 páginas
+livros = Livro.objects.filter(numero_paginas__gt=200)
+# O QUE FAZ:
+# 1. SELECT * FROM livro WHERE numero_paginas > 200
+# 2. Retorna apenas livros grandes (+ de 200 páginas)
+
+# ENCADEAMENTO (você pode combinar!):
+livros = Livro.objects.filter(
+    titulo__icontains='python',  # Tem "python" no título
+    numero_paginas__gt=200        # E tem mais de 200 páginas
+).order_by('-ano_publicacao')     # Ordenados do mais recente pro mais antigo
+# Isso é como: WHERE titulo LIKE '%python%' AND paginas > 200 ORDER BY ano DESC
+```
+
+3.6 Q OBJECTS (QUERIES COMPLEXAS)
+----------------------------------
+Para fazer OR (ou) nas queries:
+
+PROBLEMA: filter() normal só faz AND (e)
+SOLUÇÃO: Use Q objects para OR (ou), NOT (não)
+
+```python
+from django.db.models import Q
+
+# Busca livros que tenham "Python" NO TÍTULO OU NO NOME DO ESCRITOR
+livros = Livro.objects.filter(
+    Q(titulo__icontains='python') |    # Condição 1: título tem "python"
+    Q(escritor__nome__icontains='python')  # OU Condição 2: autor tem "python"
+)
+# O QUE FAZ:
+# SELECT * FROM livro WHERE titulo LIKE '%python%' OR escritor.nome LIKE '%python%'
+# RETORNA: Livros que tenham "python" no título OU livros de autor com "python" no nome
+# EXEMPLO: Encontra "Python Básico" E "Livro de João Python"
+
+# EXEMPLO 2: Busca livros baratos OU bem avaliados
+livros = Livro.objects.filter(
+    Q(preco__lt=30) |           # Preço menor que R$30
+    Q(nota_media__gte=4.5)      # OU nota maior/igual a 4.5
+)
+# Retorna: Livros baratos OU livros bons (ou ambos!)
+
+# EXEMPLO 3: Combinar AND e OR
+livros = Livro.objects.filter(
+    Q(ano_publicacao__gte=2020) &  # Ano >= 2020 E
+    (Q(titulo__icontains='python') | Q(titulo__icontains='django'))  # (Python OU Django)
+)
+# Retorna: Livros de 2020+ que tenham Python OU Django no título
+```
+
+OPERADORES:
+| = OR (ou)    → Pelo menos UMA condição precisa ser verdadeira
+& = AND (e)   → TODAS as condições precisam ser verdadeiras
+~ = NOT (não) → Inverte a condição
+
+EXEMPLO COM NOT:
+```python
+# Livros que NÃO são de ficção
+livros = Livro.objects.filter(~Q(genero='Ficção'))
+# Equivalente a: WHERE genero != 'Ficção'
+```
+
+3.7 AGREGAÇÕES
+--------------
+Calcular totais, médias, etc:
+
+```python
+from django.db.models import Sum, Avg, Count, Max, Min
+
+# Total de pontos de um usuário
+total = ProgressoLeitura.objects.filter(usuario=user).aggregate(Sum('pontos'))
+# total = {'pontos__sum': 150.00}
+
+# Média de notas de um livro
+media = Avaliacao.objects.filter(livro=livro).aggregate(Avg('nota'))
+# media = {'nota__avg': 4.5}
+```
+
+EXEMPLO DO PROJETO:
+```python
+def ranking_pontos(request):
+    usuarios = User.objects.annotate(
+        total_pontos=Sum('progressoleitura__pontos')
+    ).filter(total_pontos__gt=0).order_by('-total_pontos')
+    
+    return render(request, 'ranking.html', {'ranking': usuarios})
+```
+
+3.8 SELECT_RELATED E PREFETCH_RELATED
+--------------------------------------
+Otimizações para evitar queries múltiplas:
+
+select_related() → Para ForeignKey (1 query)
+```python
+# SEM otimização: faz 1 query por livro (N+1 problem)
+livros = Livro.objects.all()
+for livro in livros:
+    print(livro.escritor.nome)  # Query extra aqui!
+
+# COM otimização: faz apenas 1 query
+livros = Livro.objects.select_related('escritor')
+for livro in livros:
+    print(livro.escritor.nome)  # Sem query extra!
+```
+
+prefetch_related() → Para ManyToMany ou reverse ForeignKey
+
+3.9 GET_OBJECT_OR_404
+---------------------
+Busca objeto ou retorna erro 404:
+
+```python
+from django.shortcuts import get_object_or_404
+
+def detalhe_livro(request, livro_id):
+    # Se não achar, mostra página 404 automaticamente
+    livro = get_object_or_404(Livro, pk=livro_id)
+    return render(request, 'detalhe.html', {'livro': livro})
+```
+
+3.10 DECORATORS (DECORADORES)
+------------------------------
+Adicionam funcionalidades às views:
+
+@login_required → Exige login
+```python
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def meus_livros(request):
+    # Só usuários logados podem acessar
+    progressos = ProgressoLeitura.objects.filter(usuario=request.user)
+    return render(request, 'meus_livros.html', {'progressos': progressos})
+```
+
+@staff_member_required → Exige superusuário
+```python
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def gerenciar_livros(request):
+    # Só administradores podem acessar
+    livros = Livro.objects.all()
+    return render(request, 'gerenciar.html', {'livros': livros})
+```
+
+3.11 MESSAGES (MENSAGENS)
+--------------------------
+Exibir mensagens temporárias ao usuário:
+
+```python
+from django.contrib import messages
+
+messages.success(request, 'Livro adicionado com sucesso!')
+messages.error(request, 'Erro ao salvar!')
+messages.warning(request, 'Atenção!')
+messages.info(request, 'Informação importante')
+```
+
+No template:
+```html
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+```
+
+3.12 JSONRESPONSE (API)
+------------------------
+Retornar JSON em vez de HTML:
+
+```python
+from django.http import JsonResponse
+
+def api_livros(request):
+    livros = Livro.objects.values('titulo', 'ano_publicacao')
+    return JsonResponse(list(livros), safe=False)
+```
+
+================================================================================
+MÓDULO 4: URLS (ROTAS)
+================================================================================
+
+4.1 SISTEMA DE URLS
+-------------------
+URLs mapeiam caminhos para views:
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),                    # /
+    path('livros/', views.lista_livros, name='lista'),      # /livros/
+    path('livros/<int:id>/', views.detalhe, name='detalhe'),  # /livros/5/
+]
+```
+
+4.2 PARÂMETROS NA URL
+---------------------
+<int:nome> → Número inteiro
+<str:nome> → Texto
+<slug:nome> → Slug (texto-com-hifens)
+<uuid:nome> → UUID
+
+EXEMPLO:
+```python
+path('livros/<int:livro_id>/', views.detalhe_livro, name='detalhe_livro')
+
+# URL: /livros/42/
+# Na view:
+def detalhe_livro(request, livro_id):
+    livro = get_object_or_404(Livro, pk=livro_id)  # livro_id = 42
+```
+
+4.3 NAME (NOMES DE URLS)
+-------------------------
+Nomes permitem referências sem hardcode:
+
+```python
+# urls.py
+path('livros/', views.lista_livros, name='lista_livros')
+
+# template.html
+<a href="{% url 'lista_livros' %}">Ver Livros</a>
+# Gera: <a href="/livros/">Ver Livros</a>
+
+# views.py
+return redirect('lista_livros')
+```
+
+4.4 URL COM PARÂMETROS
+----------------------
+```python
+# urls.py
+path('livros/<int:livro_id>/', views.detalhe, name='detalhe_livro')
+
+# template.html
+<a href="{% url 'detalhe_livro' livro.id %}">Ver</a>
+# Gera: <a href="/livros/5/">Ver</a>
+```
+
+4.5 INCLUDE (MODULAR URLS)
+---------------------------
+Dividir URLs em apps:
+
+```python
+# projeto/urls.py
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('leia_bem.urls')),  # Delega para app
+]
+
+# leia_bem/urls.py
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('livros/', views.lista_livros, name='lista_livros'),
+]
+```
+
+================================================================================
+MÓDULO 5: TEMPLATES (HTML)
+================================================================================
+
+5.1 SINTAXE BÁSICA
+------------------
+Templates usam DTL (Django Template Language):
+
+{{ variavel }}           → Exibe variável
+{% tag %}                → Tags de lógica
+{# comentário #}         → Comentário
+
+5.2 VARIÁVEIS
+-------------
+```html
+<h1>{{ livro.titulo }}</h1>
+<p>Autor: {{ livro.escritor.nome }}</p>
+<p>Páginas: {{ livro.numero_paginas }}</p>
+```
+
+5.3 FILTROS
+-----------
+Modificam variáveis:
+
+```html
+{{ texto|lower }}                 → minúsculas
+{{ texto|upper }}                 → MAIÚSCULAS
+{{ texto|title }}                 → Primeira Letra Maiúscula
+{{ texto|truncatewords:10 }}      → Primeiras 10 palavras
+{{ texto|truncatechars:50 }}      → Primeiros 50 caracteres
+{{ valor|default:"Sem valor" }}   → Valor padrão se vazio
+{{ numero|floatformat:2 }}        → 2 casas decimais
+{{ data|date:"d/m/Y" }}           → Formata data
+{{ lista|length }}                → Tamanho da lista
+{{ texto|safe }}                  → Não escapa HTML
+```
+
+EXEMPLO DO PROJETO:
+```html
+<p>{{ livro.sinopse|truncatewords:20 }}</p>
+<p>{{ escritor.email|default:"-" }}</p>
+```
+
+5.4 TAGS IF/ELSE
+----------------
+```html
+{% if user.is_authenticated %}
+    <p>Bem-vindo, {{ user.username }}!</p>
+{% else %}
+    <a href="{% url 'login' %}">Login</a>
+{% endif %}
+
+{% if livro.nota_media >= 4 %}
+    <span class="badge bg-success">Excelente</span>
+{% elif livro.nota_media >= 3 %}
+    <span class="badge bg-warning">Bom</span>
+{% else %}
+    <span class="badge bg-danger">Regular</span>
+{% endif %}
+```
+
+Operadores:
+== (igual), != (diferente), < (menor), > (maior), <= , >=
+and, or, not
+in (está em)
+
+5.5 LOOP FOR
+------------
+```html
+{% for livro in livros %}
+    <div class="card">
+        <h3>{{ livro.titulo }}</h3>
+        <p>{{ livro.escritor.nome }}</p>
+    </div>
+{% empty %}
+    <p>Nenhum livro encontrado</p>
+{% endfor %}
+```
+
+Variáveis especiais no loop:
+{{ forloop.counter }}      → 1, 2, 3... (contador)
+{{ forloop.counter0 }}     → 0, 1, 2... (contador começando em 0)
+{{ forloop.first }}        → True na primeira iteração
+{{ forloop.last }}         → True na última iteração
+
+5.6 HERANÇA DE TEMPLATES
+-------------------------
+Template base (base.html):
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Leia Bem{% endblock %}</title>
+</head>
+<body>
+    <nav>Menu aqui</nav>
+    
+    {% block content %}
+    {% endblock %}
+    
+    <footer>Rodapé aqui</footer>
+</body>
+</html>
+```
+
+Template filho (index.html):
+```html
+{% extends 'leia_bem/base.html' %}
+
+{% block title %}Página Inicial - Leia Bem{% endblock %}
+
+{% block content %}
+    <h1>Bem-vindo!</h1>
+    <p>Conteúdo específico desta página</p>
+{% endblock %}
+```
+
+5.7 INCLUDE (REUTILIZAR HTML)
+------------------------------
+```html
+<!-- card_livro.html -->
+<div class="card">
+    <h3>{{ livro.titulo }}</h3>
+</div>
+
+<!-- index.html -->
+{% for livro in livros %}
+    {% include 'card_livro.html' %}
+{% endfor %}
+```
+
+5.8 CSRF TOKEN (SEGURANÇA)
+---------------------------
+Obrigatório em TODOS os formulários POST:
+
+```html
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="titulo">
+    <button type="submit">Salvar</button>
+</form>
+```
+
+5.9 STATIC FILES (CSS/JS/IMAGENS)
+---------------------------------
+```html
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<img src="{% static 'img/logo.png' %}" alt="Logo">
+<script src="{% static 'js/script.js' %}"></script>
+```
+
+5.10 MEDIA FILES (UPLOADS)
+---------------------------
+```html
+{% if livro.capa %}
+    <img src="{{ livro.capa.url }}" alt="{{ livro.titulo }}">
+{% endif %}
+```
+
+================================================================================
+MÓDULO 6: FORMS (FORMULÁRIOS)
+================================================================================
+
+6.1 TIPOS DE FORMS
+------------------
+A) Form → Formulário genérico
+B) ModelForm → Formulário baseado em um Model
+
+6.2 MODELFORM
+-------------
+```python
+from django import forms
+from .models import Livro
+
+class LivroForm(forms.ModelForm):
+    class Meta:
+        model = Livro
+        fields = ['titulo', 'escritor', 'editora', 'ano_publicacao']
+        # ou
+        fields = '__all__'  # Todos os campos
+        # ou
+        exclude = ['nota_media']  # Todos exceto nota_media
+```
+
+6.3 WIDGETS (PERSONALIZAR CAMPOS)
+----------------------------------
+```python
+class LivroForm(forms.ModelForm):
+    class Meta:
+        model = Livro
+        fields = ['titulo', 'sinopse']
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite o título'
+            }),
+            'sinopse': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4
+            }),
+        }
+        labels = {
+            'titulo': 'Título do Livro',
+            'sinopse': 'Resumo',
+        }
+```
+
+6.4 VALIDAÇÃO
+-------------
+```python
+class SignUpForm(UserCreationForm):
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email já cadastrado!')
+        
+        return email
+```
+
+6.5 USANDO FORMS NA VIEW
+-------------------------
+```python
+def criar_livro(request):
+    if request.method == 'POST':
+        form = LivroForm(request.POST, request.FILES)
+        if form.is_valid():
+            livro = form.save()
+            messages.success(request, 'Livro criado!')
+            return redirect('lista_livros')
+    else:
+        form = LivroForm()
+    
+    return render(request, 'form.html', {'form': form})
+```
+
+6.6 RENDERIZANDO FORM NO TEMPLATE
+----------------------------------
+```html
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Opção 1: Renderiza tudo -->
+    {{ form.as_p }}
+    
+    <!-- Opção 2: Campo por campo -->
+    {% for field in form %}
+        <div class="mb-3">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <button type="submit">Salvar</button>
+</form>
+```
+
+6.7 HERANÇA DE FORMS
+--------------------
+```python
+from django.contrib.auth.forms import UserCreationForm
+
+class SignUpForm(UserCreationForm):
+    # Herda username, password1, password2
+    # Adiciona campos extras:
+    email = forms.EmailField(required=True)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)  # Chama __init__ da classe pai
+        # Agora pode personalizar campos herdados:
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control'
+        })
+```
+
+================================================================================
+MÓDULO 7: AUTENTICAÇÃO
+================================================================================
+
+7.1 SISTEMA DE LOGIN
+--------------------
+Django já vem com autenticação pronta!
+
+```python
+# urls.py
+from django.contrib.auth import views as auth_views
+
+urlpatterns = [
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+]
+
+# settings.py
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+```
+
+7.2 CRIAR USUÁRIO
+-----------------
+```python
+from django.contrib.auth import login
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Loga automaticamente
+            return redirect('index')
+    else:
+        form = SignUpForm()
+    
+    return render(request, 'signup.html', {'form': form})
+```
+
+7.3 USUÁRIO NO TEMPLATE
+------------------------
+```html
+{% if user.is_authenticated %}
+    <p>Olá, {{ user.username }}!</p>
+    <a href="{% url 'logout' %}">Sair</a>
+{% else %}
+    <a href="{% url 'login' %}">Entrar</a>
+{% endif %}
+
+<!-- Checar se é admin -->
+{% if user.is_staff %}
+    <a href="/admin/">Painel Admin</a>
+{% endif %}
+```
+
+7.4 MODELO CUSTOMIZADO
+-----------------------
+```python
+from django.contrib.auth.models import AbstractUser
+
+class Usuario(AbstractUser):
+    nome_completo = models.CharField(max_length=200, blank=True)
+    
+# settings.py
+AUTH_USER_MODEL = "leia_bem.Usuario"
+```
+
+================================================================================
+MÓDULO 8: ADMIN (PAINEL ADMINISTRATIVO)
+================================================================================
+
+8.1 REGISTRAR MODELS
+--------------------
+```python
+# admin.py
+from django.contrib import admin
+from .models import Livro, Escritor
+
+admin.site.register(Livro)
+admin.site.register(Escritor)
+```
+
+8.2 PERSONALIZAR ADMIN
+-----------------------
+```python
+class LivroAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'escritor', 'ano_publicacao', 'nota_media')
+    list_filter = ('ano_publicacao', 'escritor')
+    search_fields = ('titulo', 'escritor__nome')
+    ordering = ('-ano_publicacao',)
+
+admin.site.register(Livro, LivroAdmin)
+```
+
+================================================================================
+MÓDULO 9: MIGRATIONS (MIGRAÇÕES)
+================================================================================
+
+9.1 O QUE SÃO MIGRATIONS?
+--------------------------
+Migrações são arquivos Python que CRIAM/MODIFICAM tabelas no banco.
+
+FLUXO:
+1. Você muda models.py
+2. python manage.py makemigrations → Cria arquivo de migração
+3. python manage.py migrate → Aplica no banco
+
+9.2 COMANDOS
+------------
+makemigrations → Cria migrações
+migrate → Aplica migrações
+showmigrations → Mostra status
+sqlmigrate app 0001 → Mostra SQL da migração
+
+EXEMPLO NO PROJETO:
+```
+0004_alter_progressoleitura_pontos.py
+```
+Essa migração muda o campo pontos de IntegerField para DecimalField.
+
+================================================================================
+MÓDULO 10: BOOTSTRAP (FRAMEWORK CSS)
+================================================================================
+
+10.1 O QUE É BOOTSTRAP?
+-----------------------
+Bootstrap é um framework CSS que fornece:
+- Componentes prontos (botões, cards, navbar)
+- Sistema de grid responsivo (mobile-first)
+- Utilitários CSS (margens, cores, flex)
+
+VANTAGENS:
+✅ Design profissional sem ser designer
+✅ Responsivo (funciona em celular/tablet/desktop)
+✅ Componentes interativos (modais, dropdowns)
+✅ Documentação completa
+
+10.2 INSTALAÇÃO
+---------------
+Via CDN (usado no projeto):
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+```
+
+10.3 SISTEMA DE GRID
+--------------------
+Bootstrap divide a tela em 12 colunas:
+
+```html
+<div class="container">          ← Centraliza conteúdo
+    <div class="row">             ← Linha
+        <div class="col-md-6">    ← 6 colunas (metade)
+            Conteúdo 1
+        </div>
+        <div class="col-md-6">    ← 6 colunas (metade)
+            Conteúdo 2
+        </div>
+    </div>
+</div>
+```
+
+BREAKPOINTS:
+col-       → Todas as telas
+col-sm-    → ≥576px (celular horizontal)
+col-md-    → ≥768px (tablet)
+col-lg-    → ≥992px (desktop)
+col-xl-    → ≥1200px (desktop grande)
+
+EXEMPLO DO PROJETO:
+```html
+<div class="row">
+    {% for livro in livros %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <!-- Card do livro -->
+        </div>
+    {% endfor %}
+</div>
+```
+Isso cria: 3 colunas em tablet, 4 em desktop!
+
+10.4 COMPONENTES
+----------------
+
+A) BOTÕES:
+```html
+<button class="btn btn-primary">Primário</button>
+<button class="btn btn-success">Sucesso</button>
+<button class="btn btn-danger">Perigo</button>
+<button class="btn btn-warning">Aviso</button>
+<button class="btn btn-info">Info</button>
+<button class="btn btn-outline-primary">Outline</button>
+
+<!-- Tamanhos -->
+<button class="btn btn-sm btn-primary">Pequeno</button>
+<button class="btn btn-lg btn-primary">Grande</button>
+```
+
+B) CARDS:
+```html
+<div class="card">
+    <img src="..." class="card-img-top">
+    <div class="card-body">
+        <h5 class="card-title">Título</h5>
+        <p class="card-text">Texto</p>
+        <a href="#" class="btn btn-primary">Botão</a>
+    </div>
+</div>
+```
+
+C) NAVBAR:
+```html
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Logo</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/livros/">Livros</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+```
+
+D) FORMS:
+```html
+<div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" placeholder="email@exemplo.com">
+</div>
+
+<select class="form-select">
+    <option>Opção 1</option>
+    <option>Opção 2</option>
+</select>
+
+<textarea class="form-control" rows="3"></textarea>
+```
+
+E) MODAIS:
+```html
+<!-- Botão que abre modal -->
+<button data-bs-toggle="modal" data-bs-target="#meuModal">
+    Abrir Modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="meuModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Título</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Conteúdo do modal
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+F) ALERTAS:
+```html
+<div class="alert alert-success">Sucesso!</div>
+<div class="alert alert-danger">Erro!</div>
+<div class="alert alert-warning">Atenção!</div>
+<div class="alert alert-info">Informação</div>
+```
+
+G) BADGES:
+```html
+<span class="badge bg-primary">Novo</span>
+<span class="badge bg-success">Completo</span>
+<span class="badge bg-danger">Urgente</span>
+```
+
+H) PROGRESS BARS:
+```html
+<div class="progress">
+    <div class="progress-bar" style="width: 75%">75%</div>
+</div>
+
+<!-- Animada -->
+<div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+         style="width: 50%">
+    </div>
+</div>
+```
+
+I) TABELAS:
+```html
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>João</td>
+            <td>joao@email.com</td>
+        </tr>
+    </tbody>
+</table>
+```
+
+10.5 UTILITÁRIOS
+----------------
+
+A) MARGENS E PADDING:
+m-3  → margin: 1rem
+mt-3 → margin-top
+mb-3 → margin-bottom
+ms-3 → margin-start (esquerda)
+me-3 → margin-end (direita)
+mx-3 → margin horizontal
+my-3 → margin vertical
+
+p-3  → padding
+pt-3, pb-3, ps-3, pe-3, px-3, py-3 (mesma lógica)
+
+Tamanhos: 0, 1, 2, 3, 4, 5 (0=0px, 5=3rem)
+
+B) CORES:
+text-primary, text-success, text-danger, text-warning
+bg-primary, bg-success, bg-danger, bg-warning
+
+C) DISPLAY:
+d-none → display: none
+d-block → display: block
+d-flex → display: flex
+d-inline → display: inline
+
+D) ALINHAMENTO DE TEXTO:
+text-start → Esquerda
+text-center → Centro
+text-end → Direita
+
+E) FLEX:
+d-flex → Ativa flexbox
+justify-content-center → Centraliza horizontal
+align-items-center → Centraliza vertical
+flex-column → Direção coluna
+
+F) WIDTH/HEIGHT:
+w-25, w-50, w-75, w-100 → Largura 25%, 50%, 75%, 100%
+h-25, h-50, h-75, h-100 → Altura
+
+G) BORDAS:
+border → Adiciona borda
+border-primary → Borda azul
+rounded → Bordas arredondadas
+rounded-circle → Círculo
+
+H) SOMBRAS:
+shadow → Sombra
+shadow-sm → Sombra pequena
+shadow-lg → Sombra grande
+
+10.6 RESPONSIVIDADE
+-------------------
+Classes responsivas usam breakpoints:
+
+```html
+<!-- Esconde no celular, mostra em tablet+ -->
+<div class="d-none d-md-block">Só desktop</div>
+
+<!-- 12 colunas (100%) no celular, 6 (50%) em tablet+ -->
+<div class="col-12 col-md-6">Responsivo</div>
+```
+
+10.7 ÍCONES (FONT AWESOME)
+---------------------------
+Bootstrap não tem ícones, mas Font Awesome sim!
+
+```html
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Usando -->
+<i class="fas fa-book"></i>           → Livro
+<i class="fas fa-user"></i>           → Usuário
+<i class="fas fa-star"></i>           → Estrela
+<i class="fas fa-heart"></i>          → Coração
+<i class="fas fa-trash"></i>          → Lixeira
+<i class="fas fa-edit"></i>           → Editar
+<i class="fas fa-plus"></i>           → Mais
+<i class="fas fa-check"></i>          → Check
+<i class="fas fa-times"></i>          → X
+<i class="fas fa-trophy"></i>         → Troféu
+<i class="fas fa-coins"></i>          → Moedas
+```
+
+Tamanhos:
+fa-xs, fa-sm, fa-lg, fa-2x, fa-3x, fa-5x, fa-10x
+
+================================================================================
+MÓDULO 11: BOAS PRÁTICAS
+================================================================================
+
+11.1 ORGANIZAÇÃO DE CÓDIGO
+---------------------------
+✅ Um model por arquivo (se ficar grande)
+✅ Views relacionadas juntas
+✅ Templates em pastas por app
+✅ Nomes descritivos para variáveis
+✅ Comentários para lógica complexa
+
+11.2 SEGURANÇA
+--------------
+✅ Nunca exponha SECRET_KEY
+✅ DEBUG = False em produção
+✅ Use ALLOWED_HOSTS em produção
+✅ Sempre use {% csrf_token %} em forms
+✅ Valide dados do usuário
+✅ Use @login_required para proteger views
+
+11.3 PERFORMANCE
+----------------
+✅ Use select_related() e prefetch_related()
+✅ Crie indexes em campos de busca frequente
+✅ Limite querysets com [:10]
+✅ Use cache para dados que não mudam muito
+✅ Otimize imagens antes de fazer upload
+
+11.4 DRY (DON'T REPEAT YOURSELF)
+---------------------------------
+✅ Reutilize templates com {% include %}
+✅ Use herança de templates
+✅ Crie métodos nos models para lógica reutilizável
+✅ Use constantes para valores fixos
+
+11.5 VERSIONAMENTO
+-------------------
+✅ Use Git
+✅ Commits frequentes com mensagens claras
+✅ .gitignore para db.sqlite3, __pycache__, media/
+
+================================================================================
+MÓDULO 12: EXEMPLOS PRÁTICOS DO PROJETO
+================================================================================
+
+12.1 EXEMPLO COMPLETO: SISTEMA DE RANKING
+------------------------------------------
+
+1) MODEL:
+```python
+class ProgressoLeitura(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    pontos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+```
+
+2) VIEW:
+```python
+from django.db.models import Sum
+
+def ranking_pontos(request):
+    usuarios = Usuario.objects.annotate(
+        total_pontos=Sum('progressoleitura__pontos')
+    ).filter(total_pontos__gt=0).order_by('-total_pontos')[:50]
+    
+    return render(request, 'ranking.html', {'ranking': usuarios})
+```
+
+3) TEMPLATE:
+```html
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1><i class="fas fa-trophy"></i> Ranking</h1>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Posição</th>
+                <th>Usuário</th>
+                <th><i class="fas fa-coins"></i> Janjetas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in ranking %}
+            <tr {% if usuario == user %}class="table-primary"{% endif %}>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ usuario.username }}</td>
+                <td>{{ usuario.total_pontos }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+```
+
+4) URL:
+```python
+path('ranking/', views.ranking_pontos, name='ranking_pontos'),
+```
+
+12.2 EXEMPLO: CRUD COMPLETO
+----------------------------
+
+1) MODEL:
+```python
+class Livro(models.Model):
+    titulo = models.CharField(max_length=300)
+    ano_publicacao = models.PositiveSmallIntegerField(null=True, blank=True)
+```
+
+2) FORM:
+```python
+class LivroForm(forms.ModelForm):
+    class Meta:
+        model = Livro
+        fields = ['titulo', 'ano_publicacao']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'ano_publicacao': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+```
+
+3) VIEWS:
+```python
+@staff_member_required
+def criar_livro(request):
+    if request.method == 'POST':
+        form = LivroForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Livro criado!')
+            return redirect('lista_livros')
+    else:
+        form = LivroForm()
+    return render(request, 'livro_form.html', {'form': form})
+
+@staff_member_required
+def editar_livro(request, livro_id):
+    livro = get_object_or_404(Livro, pk=livro_id)
+    if request.method == 'POST':
+        form = LivroForm(request.POST, instance=livro)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Livro atualizado!')
+            return redirect('lista_livros')
+    else:
+        form = LivroForm(instance=livro)
+    return render(request, 'livro_form.html', {'form': form, 'livro': livro})
+
+@staff_member_required
+def deletar_livro(request, livro_id):
+    livro = get_object_or_404(Livro, pk=livro_id)
+    if request.method == 'POST':
+        livro.delete()
+        messages.success(request, 'Livro deletado!')
+        return redirect('lista_livros')
+    return render(request, 'livro_confirmar_delete.html', {'livro': livro})
+```
+
+4) URLS:
+```python
+path('livros/criar/', views.criar_livro, name='criar_livro'),
+path('livros/<int:livro_id>/editar/', views.editar_livro, name='editar_livro'),
+path('livros/<int:livro_id>/deletar/', views.deletar_livro, name='deletar_livro'),
+```
+
+5) TEMPLATE (livro_form.html):
+```html
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{% if livro %}Editar{% else %}Criar{% endif %} Livro</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'lista_livros' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
+```
+
+================================================================================
+MÓDULO 13: DICAS FINAIS
+================================================================================
+
+13.1 DEBUGGING
+--------------
+- Use print() para debug
+- Instale Django Debug Toolbar
+- Veja logs no terminal do runserver
+- Use shell: python manage.py shell
+
+13.2 DOCUMENTAÇÃO
+-----------------
+Django: https://docs.djangoproject.com/
+Bootstrap: https://getbootstrap.com/docs/
+Font Awesome: https://fontawesome.com/icons
+
+13.3 PRÓXIMOS PASSOS
+--------------------
+✅ Django REST Framework (APIs)
+✅ Deploy (Heroku, PythonAnywhere)
+✅ PostgreSQL (banco em produção)
+✅ Celery (tarefas assíncronas)
+✅ WebSockets (Django Channels)
+✅ Testes automatizados
+
+================================================================================
+FIM DO MINICURSO
+================================================================================
+
+Parabéns! Agora você entende:
+✅ Como Django estrutura projetos (Models, Views, Templates, URLs)
+✅ Como criar banco de dados com Models
+✅ Como processar requisições com Views
+✅ Como criar páginas com Templates
+✅ Como usar Bootstrap para UI profissional
+✅ Como implementar autenticação
+✅ Como criar CRUD completo
+✅ Como fazer sistema de gamificação (Janjetas!)
+
+Continue praticando e explorando a documentação!
+Happy coding! 🚀📚
